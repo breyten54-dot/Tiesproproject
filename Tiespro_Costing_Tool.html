@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiespro Training Institute — Costing &amp; Quotation Tool</title>
+<style>
+  :root{
+    --navy:#1F3864; --navy-dark:#152647; --navy-light:#2E4A7D;
+    --gold:#C9A84C; --gold-light:#F3E9CE;
+    --green:#1B7A43; --green-bg:#E7F5EC;
+    --amber:#B8790A; --amber-bg:#FDF1DC;
+    --red:#B4232C; --red-bg:#FBE7E8;
+    --bg:#F5F6F8; --card:#FFFFFF; --line:#E2E5EA;
+    --text:#20242C; --muted:#6B7280;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);}
+  header.app-header{background:var(--navy);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  header.app-header .brand{display:flex;flex-direction:column;}
+  header.app-header .brand .name{font-size:20px;font-weight:800;letter-spacing:.3px;}
+  header.app-header .brand .tag{font-size:12px;color:var(--gold);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+  header.app-header .meta{font-size:11.5px;color:#C7D1E6;text-align:right;}
+
+  nav.tabs{display:flex;background:var(--navy-dark);padding:0 20px;overflow-x:auto;}
+  nav.tabs button{background:none;border:none;color:#B9C4DE;padding:14px 18px;font-size:13.5px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;letter-spacing:.2px;}
+  nav.tabs button.active{color:#fff;border-bottom:3px solid var(--gold);}
+  nav.tabs button:hover{color:#fff;}
+
+  main{max-width:1300px;margin:0 auto;padding:22px 20px 60px;}
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;}
+
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start;}
+  @media (max-width:980px){.grid{grid-template-columns:1fr;}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;}
+  .card h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
+  .card .sub{font-size:12px;color:var(--muted);margin:0 0 16px;}
+  .card h3{font-size:13px;color:var(--navy);margin:18px 0 10px;text-transform:uppercase;letter-spacing:.4px;border-top:1px solid var(--line);padding-top:14px;}
+  .card h3:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+
+  .field{margin-bottom:13px;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:#3A4150;margin-bottom:5px;}
+  .field .hint{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:4px;}
+  .field input[type=text],.field input[type=number],.field select,.field input[type=date]{
+    width:100%;padding:9px 10px;border:1px solid #CBD2DD;border-radius:7px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--text);
+  }
+  .field input:focus,.field select:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(31,56,100,.12);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  @media (max-width:560px){.row2,.row3{grid-template-columns:1fr;}}
+
+  .checkline{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;font-weight:600;}
+  .checkline input{width:16px;height:16px;}
+
+  .radiogroup{display:flex;flex-direction:column;gap:8px;}
+  .radiogroup label{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;padding:9px 11px;border:1px solid #CBD2DD;border-radius:7px;cursor:pointer;}
+  .radiogroup label.selected{border-color:var(--navy);background:#F0F4FA;}
+  .radiogroup input{margin-top:2px;}
+  .radiogroup .desc{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:2px;}
+
+  .breakdown{position:sticky;top:14px;}
+  table.costtable{width:100%;border-collapse:collapse;font-size:13px;}
+  table.costtable td{padding:7px 0;border-bottom:1px solid #EEF0F3;}
+  table.costtable td.amt{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  table.costtable tr.sub td{color:var(--muted);font-size:11.5px;padding-left:12px;border-bottom:none;padding-top:0;padding-bottom:4px;}
+  table.costtable tr.total td{font-weight:800;border-top:2px solid var(--navy);border-bottom:none;padding-top:10px;font-size:14px;}
+  table.costtable tr.grandtotal td{font-weight:800;color:var(--navy);font-size:16px;border-top:2px solid var(--gold);padding-top:12px;}
+  table.costtable tr.category td{font-weight:700;color:var(--navy);padding-top:12px;}
+
+  .discountbox{background:var(--gold-light);border-radius:8px;padding:14px 16px;margin:16px 0;}
+  .discountbox .drow{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .discountbox input[type=range]{width:100%;accent-color:var(--navy);}
+  .discountbox .val{font-weight:800;color:var(--navy);font-size:15px;}
+
+  .indicator{border-radius:8px;padding:12px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .indicator.green{background:var(--green-bg);color:var(--green);}
+  .indicator.amber{background:var(--amber-bg);color:var(--amber);}
+  .indicator.red{background:var(--red-bg);color:var(--red);}
+  .indicator .dot{width:10px;height:10px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+  .pricebig{text-align:center;padding:16px 0 6px;}
+  .pricebig .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+  .pricebig .amount{font-size:34px;font-weight:800;color:var(--navy);margin:2px 0;}
+  .pricebig .perlearner{font-size:12.5px;color:var(--muted);}
+
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  button.btn{border:none;border-radius:7px;padding:11px 18px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+  button.btn.primary{background:var(--navy);color:#fff;}
+  button.btn.primary:hover{background:var(--navy-light);}
+  button.btn.gold{background:var(--gold);color:#3A2E0B;}
+  button.btn.gold:hover{filter:brightness(1.05);}
+  button.btn.ghost{background:#fff;border:1px solid #CBD2DD;color:var(--text);}
+  button.btn.ghost:hover{background:#F5F6F8;}
+  button.btn.danger{background:#fff;border:1px solid #E3B3B6;color:var(--red);}
+
+  .assumpgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 24px;}
+  @media (max-width:760px){.assumpgrid{grid-template-columns:1fr;}}
+
+  .note{background:#F0F4FA;border-radius:8px;padding:12px 14px;font-size:12px;color:#3A4150;margin-bottom:16px;line-height:1.5;}
+  .note b{color:var(--navy);}
+
+  table.savedlist{width:100%;border-collapse:collapse;font-size:13px;}
+  table.savedlist th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding:8px 6px;}
+  table.savedlist td{padding:10px 6px;border-bottom:1px solid #EEF0F3;}
+  table.savedlist tr:hover{background:#FAFBFC;}
+  .pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .pill.green{background:var(--green-bg);color:var(--green);}
+  .pill.amber{background:var(--amber-bg);color:var(--amber);}
+  .pill.red{background:var(--red-bg);color:var(--red);}
+  .emptystate{text-align:center;padding:40px 20px;color:var(--muted);font-size:13.5px;}
+
+  /* Print / client quote */
+  #printArea{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
+  }
+  .pq-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--gold);padding-bottom:14px;margin-bottom:20px;}
+  .pq-header h1{color:var(--navy);font-size:22px;margin:0 0 4px;}
+  .pq-header .sub{color:var(--muted);font-size:12px;}
+  .pq-meta{text-align:right;font-size:12px;color:#3A4150;line-height:1.6;}
+  .pq-section-title{font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);border-bottom:1px solid var(--line);padding-bottom:6px;margin:20px 0 10px;}
+  table.pq-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
+  table.pq-table th{text-align:left;background:var(--navy);color:#fff;padding:8px 10px;font-size:12px;}
+  table.pq-table td{padding:8px 10px;border-bottom:1px solid #EEF0F3;}
+  table.pq-table td.amt{text-align:right;font-variant-numeric:tabular-nums;}
+  table.pq-table tr.total td{font-weight:800;border-top:2px solid var(--navy);font-size:14px;}
+  .pq-terms{font-size:11px;color:var(--muted);line-height:1.6;margin-top:20px;border-top:1px solid var(--line);padding-top:12px;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .25s;z-index:999;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">
+    <div class="name">TIESPRO TRAINING INSTITUTE</div>
+    <div class="tag">Costing &amp; Quotation Tool</div>
+  </div>
+  <div class="meta">TETA Accreditation 06-157 &nbsp;|&nbsp; Praeto Group Holdings<br>For internal staff use — generates client-ready quotations</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="build">Build Quote</button>
+  <button class="tab-btn" data-tab="assumptions">Rate Assumptions</button>
+  <button class="tab-btn" data-tab="saved">Saved Quotes</button>
+  <button class="tab-btn" data-tab="help">How This Works</button>
+</nav>
+
+<main>
+
+<!-- ============ BUILD QUOTE TAB ============ -->
+<div class="tabpanel active" id="tab-build">
+  <div class="grid">
+    <div>
+
+      <div class="card">
+        <h2>1. Client &amp; Programme Details</h2>
+        <p class="sub">Basic information for this quotation</p>
+        <div class="row2">
+          <div class="field"><label>Client / Company Name</label><input type="text" id="clientName" placeholder="e.g. Value Logistics"></div>
+          <div class="field"><label>Quote Reference</label><input type="text" id="quoteRef"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Prepared By</label><input type="text" id="preparedBy" placeholder="Staff member name"></div>
+          <div class="field"><label>Quote Date</label><input type="date" id="quoteDate"></div>
+        </div>
+
+        <h3>Programme</h3>
+        <div class="row2">
+          <div class="field">
+            <label>Qualification / Programme</label>
+            <select id="qualification">
+              <option value="Clearing and Forwarding Agent|5|40">Clearing and Forwarding Agent (NQF 5)</option>
+              <option value="Supply Chain Practitioner|5|40">Supply Chain Practitioner (NQF 5)</option>
+              <option value="Transport Clerk|4|30">Transport Clerk (NQF 4)</option>
+              <option value="Freight Handler|3|20">Freight Handler (NQF 3)</option>
+              <option value="Truck Driver|3|20">Truck Driver (NQF 3)</option>
+              <option value="Bus Driver|3|20">Bus Driver (NQF 3)</option>
+              <option value="Taxi Driver|3|20">Taxi Driver (NQF 3)</option>
+              <option value="Custom|0|10">Other / Custom Programme</option>
+            </select>
+            <span class="hint">Selecting a qualification pre-fills typical NQF level &amp; training days — edit freely below</span>
+          </div>
+          <div class="field"><label>NQF Level</label><input type="text" id="nqfLevel"></div>
+        </div>
+        <div class="row3">
+          <div class="field"><label>Number of Learners</label><input type="number" id="numLearners" value="20" min="1"></div>
+          <div class="field"><label>Training Days</label><input type="number" id="trainingDays" value="20" min="0"></div>
+          <div class="field"><label>Assessment Days</label><input type="number" id="assessmentDays" value="4" min="0"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Internal Moderation Days</label><input type="number" id="moderationDays" value="2" min="0"></div>
+          <div class="field"><label>Contract / Programme Duration (months)</label><input type="number" id="durationMonths" value="12" min="1"></div>
+        </div>
+        <div class="checkline"><input type="checkbox" id="eisaRequired" checked><label for="eisaRequired" style="margin:0;">EISA (external exam) required for this qualification</label></div>
+        <div class="checkline"><input type="checkbox" id="externalMod"><label for="externalMod" style="margin:0;">External moderation required (SETA/AQP-appointed)</label></div>
+        <div class="checkline"><input type="checkbox" id="ppeRequired" checked><label for="ppeRequired" style="margin:0;">Practical PPE / consumables required (safety wear, protective gear)</label></div>
+      </div>
+
+      <div class="card">
+        <h2>2. Locality &amp; Delivery Logistics</h2>
+        <p class="sub">Drives travel, accommodation and venue costs — the most commonly under-quoted line items</p>
+        <div class="field">
+          <label>Delivery Location</label>
+          <div class="radiogroup" id="deliveryGroup">
+            <label class="selected"><input type="radio" name="delivery" value="centre" checked> Tiespro Training Centre (Durban)
+              <span class="desc">No travel or accommodation costs. Client learners travel to Tiespro.</span></label>
+            <label><input type="radio" name="delivery" value="local"> Client Site — Local (same-day travel, &lt;150km round trip)
+              <span class="desc">Facilitator/assessor commute daily. Travel cost only, no accommodation.</span></label>
+            <label><input type="radio" name="delivery" value="remote"> Client Site — Remote (requires overnight stay)
+              <span class="desc">Travel + accommodation + subsistence for each site visit.</span></label>
+          </div>
+        </div>
+        <div id="travelFields">
+          <div class="row3">
+            <div class="field"><label>One-way distance from Durban (km)</label><input type="number" id="distanceKm" value="0" min="0"></div>
+            <div class="field"><label>Number of return trips</label><input type="number" id="numTrips" value="1" min="0">
+              <span class="hint">Local: usually 1 trip per training/assessment day. Remote: 1 trip per site-visit block.</span></div>
+            <div class="field"><label>Travelling personnel per trip</label><input type="number" id="travellers" value="1" min="1"></div>
+          </div>
+          <div class="row2" id="accomFields" style="display:none;">
+            <div class="field"><label>Accommodation nights required (total)</label><input type="number" id="nights" value="0" min="0"></div>
+            <div class="field"><label>Person-days away (for subsistence)</label><input type="number" id="personDaysAway" value="0" min="0">
+              <span class="hint">= nights + travel days, × number of travelling personnel</span></div>
+          </div>
+        </div>
+        <div class="checkline"><input type="checkbox" id="venueRequired"><label for="venueRequired" style="margin:0;">Venue hire required (client cannot provide suitable training venue)</label></div>
+      </div>
+
+      <div class="card">
+        <h2>3. Per-Learner Materials &amp; Compliance</h2>
+        <p class="sub">These scale directly with the number of learners — see Rate Assumptions tab to adjust unit costs</p>
+        <div class="note">Defaults pull from the Rate Assumptions tab. Adjust there once and every quote updates — no need to re-enter per quote.</div>
+      </div>
+
+    </div>
+
+    <!-- LIVE BREAKDOWN -->
+    <div class="breakdown">
+      <div class="card">
+        <h2>Live Cost &amp; Price Breakdown</h2>
+        <p class="sub">Internal view — not shown to client</p>
+        <table class="costtable" id="costTable"></table>
+
+        <div class="discountbox">
+          <div class="drow"><span style="font-weight:700;font-size:13px;">Discount to Client</span><span class="val" id="discountVal">0%</span></div>
+          <input type="range" id="discountSlider" min="0" max="25" step="1" value="0">
+          <div class="drow" style="margin-top:10px;margin-bottom:0;"><span style="font-size:11.5px;color:var(--muted);">Maximum allowed: 25%</span><span style="font-size:11.5px;color:var(--muted);" id="marginAtDiscount"></span></div>
+        </div>
+
+        <div class="pricebig">
+          <div class="label">Quoted Price to Client (excl. VAT)</div>
+          <div class="amount" id="finalPrice">R0</div>
+          <div class="perlearner" id="perLearnerPrice"></div>
+        </div>
+        <div id="marginIndicator"></div>
+
+        <div class="btnrow">
+          <button class="btn primary" id="btnGenerate">Generate Client Quote</button>
+          <button class="btn gold" id="btnSave">Save Quote</button>
+          <button class="btn ghost" id="btnReset">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ASSUMPTIONS TAB ============ -->
+<div class="tabpanel" id="tab-assumptions">
+  <div class="card">
+    <h2>Rate Assumptions &amp; Cost Benchmarks</h2>
+    <p class="sub">These are the default unit rates every quote is built from. Review quarterly — several are tied to published market/SARS figures that change annually.</p>
+    <div class="note"><b>Sourced defaults:</b> Travel rate defaults to the SARS prescribed rate per kilometre (R4.95/km, 2026/27 tax year). Subsistence defaults to the SARS deemed daily allowance for local overnight travel (R595/day). Facilitator, assessor and moderator rates are indicative freelance market ranges for accredited SETA/QCTO practitioners — <b>replace with your actual contracted rates.</b> EISA and SETA administration fees vary by qualification and AQP — confirm the exact figure per qualification before quoting.</div>
+
+    <div class="assumpgrid">
+      <div>
+        <h3>People Costs (per day, ZAR)</h3>
+        <div class="field"><label>Facilitator day rate</label><input type="number" id="rFacilitator" value="3500"></div>
+        <div class="field"><label>Assessor day rate</label><input type="number" id="rAssessor" value="3200"></div>
+        <div class="field"><label>Internal moderator day rate</label><input type="number" id="rModerator" value="3800"></div>
+        <div class="field"><label>External moderator fee (flat, if required)</label><input type="number" id="rExternalMod" value="4500"></div>
+        <div class="field"><label>EISA invigilation fee (flat, per session)</label><input type="number" id="rInvigilation" value="2500"></div>
+      </div>
+      <div>
+        <h3>Travel &amp; Logistics</h3>
+        <div class="field"><label>Travel rate per km (round trip auto ×2)</label><input type="number" id="rKm" value="4.95" step="0.01"></div>
+        <div class="field"><label>Accommodation per night, per person</label><input type="number" id="rAccom" value="1250"></div>
+        <div class="field"><label>Subsistence per person-day away</label><input type="number" id="rSubsistence" value="595"></div>
+        <div class="field"><label>Venue hire per day (if required)</label><input type="number" id="rVenue" value="2200"></div>
+      </div>
+      <div>
+        <h3>Per-Learner Costs (ZAR each)</h3>
+        <div class="field"><label>Learner materials / workbook</label><input type="number" id="rMaterials" value="450"></div>
+        <div class="field"><label>PPE / practical consumables</label><input type="number" id="rPPE" value="650"></div>
+        <div class="field"><label>SETA/QCTO registration &amp; data-load admin</label><input type="number" id="rRegistration" value="350"></div>
+        <div class="field"><label>EISA registration fee (external exam)</label><input type="number" id="rEISA" value="1850"></div>
+        <div class="field"><label>Certification / Statement of Results issuing</label><input type="number" id="rCert" value="180"></div>
+        <div class="field"><label>Learner injury/liability insurance (WBL cover)</label><input type="number" id="rInsurance" value="120"></div>
+      </div>
+      <div>
+        <h3>Buffers, Overheads &amp; Margin</h3>
+        <div class="field"><label>Contingency / hidden-cost buffer (%)</label><input type="number" id="rContingency" value="8"></div>
+        <div class="field"><label>Cost-of-capital / cash-flow financing (%)</label><input type="number" id="rFinancing" value="2"></div>
+        <div class="field"><label>Compliance &amp; accreditation overhead (%)</label><input type="number" id="rCompliance" value="3"></div>
+        <div class="field"><label>Company overhead allocation (%)</label><input type="number" id="rOverhead" value="15"></div>
+        <div class="field"><label>Target gross margin (%)</label><input type="number" id="rTargetMargin" value="40"></div>
+        <div class="field"><label>Minimum acceptable margin floor (%)</label><input type="number" id="rMinMargin" value="20"></div>
+        <div class="field"><label>VAT rate (%)</label><input type="number" id="rVAT" value="15"></div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn primary" id="btnSaveAssumptions">Save as Default Assumptions</button>
+      <button class="btn ghost" id="btnResetAssumptions">Reset to Suggested Defaults</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SAVED QUOTES TAB ============ -->
+<div class="tabpanel" id="tab-saved">
+  <div class="card">
+    <h2>Saved Quotes</h2>
+    <p class="sub">Quotes saved on this device/browser. Load a quote to review, duplicate or re-issue with an updated discount.</p>
+    <div id="savedListWrap"><div class="emptystate">No quotes saved yet — build a quote and click "Save Quote".</div></div>
+  </div>
+</div>
+
+<!-- ============ HELP TAB ============ -->
+<div class="tabpanel" id="tab-help">
+  <div class="card">
+    <h2>How the pricing logic works</h2>
+    <p class="sub">A quick reference for any staff member using this tool for the first time</p>
+    <h3>1. Direct costs are built up first</h3>
+    <p style="font-size:13px;line-height:1.6;">Facilitator, assessor and moderator fees (day rate × number of days), travel (distance × rate × trips), accommodation and subsistence (if the delivery is off-site and overnight), venue hire, and every per-learner cost (materials, PPE, SETA registration, EISA, certification, insurance) are added together into a <b>Subtotal Direct Cost</b>.</p>
+    <h3>2. Hidden and consequential costs are added automatically</h3>
+    <p style="font-size:13px;line-height:1.6;">A <b>contingency buffer</b> covers things that go wrong on real programmes: learner no-shows, re-assessments, weather delays, last-minute venue changes. A <b>cost-of-capital charge</b> covers the fact that Tiespro pays facilitators, travel and materials up front, often before the client pays or before any SETA grant is reimbursed. A <b>compliance/accreditation overhead</b> covers the ongoing cost of keeping TETA accreditation current — audits, POE storage, QMS maintenance — spread across every paying programme.</p>
+    <h3>3. Company overhead and target margin are applied</h3>
+    <p style="font-size:13px;line-height:1.6;">A <b>company overhead allocation</b> (office, admin salaries, software, insurance) is added, then the <b>target gross margin</b> is applied to arrive at the List Price. The target margin defaults to 40% specifically so that even a full 25% discount still leaves a healthy margin — see the live indicator change colour as you move the discount slider.</p>
+    <h3>4. The discount slider never lets you quote a loss silently</h3>
+    <p style="font-size:13px;line-height:1.6;"><span class="pill green">Green</span> = margin at or above the minimum floor (default 20%). <span class="pill amber">Amber</span> = margin positive but below the floor — proceed with sign-off from a manager. <span class="pill red">Red</span> = the quote is at or below cost — do not send without repricing.</p>
+    <h3>5. Generating the client quote</h3>
+    <p style="font-size:13px;line-height:1.6;">The client-facing quote only ever shows packaged line items (Training Delivery, Assessment &amp; Moderation, Examination/EISA, Travel &amp; Logistics, Materials &amp; Compliance, Total) — it never reveals your internal cost breakdown or margin. Click "Generate Client Quote" to preview and print/save as PDF using your browser's print dialog.</p>
+    <div class="note" style="margin-top:16px;"><b>Keep this current:</b> travel and subsistence rates are tied to SARS-published figures that change every tax year (1 March). Facilitator/assessor/EISA fees should be checked against your actual signed contractor and AQP agreements at least twice a year.</div>
+  </div>
+</div>
+
+</main>
+
+<!-- Printable client quote (hidden on screen) -->
+<div id="printArea">
+  <div class="pq-header">
+    <div>
+      <h1>TIESPRO TRAINING INSTITUTE</h1>
+      <div class="sub">TETA Accreditation 06-157 · A Praeto Group Holdings Entity</div>
+    </div>
+    <div class="pq-meta" id="pqMeta"></div>
+  </div>
+  <div class="pq-section-title">Quotation For</div>
+  <div id="pqClientBlock" style="font-size:13px;line-height:1.7;"></div>
+
+  <div class="pq-section-title">Programme Summary</div>
+  <table class="pq-table" id="pqSummaryTable"></table>
+
+  <div class="pq-section-title">Investment</div>
+  <table class="pq-table" id="pqPriceTable"></table>
+
+  <div class="pq-terms">
+    This quotation is valid for 30 days from the date above. Pricing excludes VAT unless otherwise stated. Final scheduling is subject to written confirmation and a signed service agreement. Skills Development Levy (SDL) mandatory grant reclaims, Section 12H tax allowances and Employment Tax Incentive benefits, where applicable, accrue to the client directly and are not included in the price above. Travel and accommodation costs are estimated on the locality details supplied and will be confirmed on final scheduling. Tiespro Training Institute · CIPC 2005/026060/07 · TETA Accreditation 06-157.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+
+  // ---------- Storage helpers (persistent if available, in-memory fallback otherwise) ----------
+  var memoryStore = {};
+  var hasWindowStorage = typeof window.storage !== 'undefined' && window.storage;
+
+  async function storeGet(key){
+    if(hasWindowStorage){
+      try{ var r = await window.storage.get(key,false); return r ? r.value : null; }catch(e){ return null; }
+    }
+    return memoryStore.hasOwnProperty(key) ? memoryStore[key] : null;
+  }
+  async function storeSet(key,value){
+    if(hasWindowStorage){
+      try{ await window.storage.set(key,value,false); return true; }catch(e){ return false; }
+    }
+    memoryStore[key]=value; return true;
+  }
+  async function storeListKeys(prefix){
+    if(hasWindowStorage){
+      try{ var r = await window.storage.list(prefix,false); return r ? r.keys : []; }catch(e){ return []; }
+    }
+    return Object.keys(memoryStore).filter(function(k){return k.indexOf(prefix)===0;});
+  }
+  async function storeDelete(key){
+    if(hasWindowStorage){
+      try{ await window.storage.delete(key,false); return true; }catch(e){ return false; }
+    }
+    delete memoryStore[key]; return true;
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+      document.querySelectorAll('.tabpanel').forEach(function(p){p.classList.remove('active');});
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+      if(btn.dataset.tab==='saved') renderSavedList();
+    });
+  });
+
+  function fmtR(n){
+    n = Math.round(n||0);
+    return 'R' + n.toLocaleString('en-ZA');
+  }
+  function toast(msg){
+    var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    setTimeout(function(){t.classList.remove('show');},2200);
+  }
+
+  // ---------- Discount slider (declared early: referenced by calcAll, which other setup below triggers immediately) ----------
+  var discountSlider = document.getElementById('discountSlider');
+  discountSlider.addEventListener('input', function(){
+    document.getElementById('discountVal').textContent = discountSlider.value + '%';
+    calcAll();
+  });
+
+  // ---------- Quote reference & date defaults ----------
+  var qRef = document.getElementById('quoteRef');
+  var qDate = document.getElementById('quoteDate');
+  function genRef(){
+    var d=new Date();
+    return 'TQ-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+Math.floor(Math.random()*90+10);
+  }
+  qRef.value = genRef();
+  qDate.value = new Date().toISOString().slice(0,10);
+
+  // ---------- Qualification select prefill ----------
+  var qualSel = document.getElementById('qualification');
+  qualSel.addEventListener('change', function(){
+    var parts = qualSel.value.split('|');
+    document.getElementById('nqfLevel').value = parts[1]==='0' ? '' : parts[1];
+    document.getElementById('trainingDays').value = parts[2];
+    calcAll();
+  });
+  qualSel.dispatchEvent(new Event('change'));
+
+  // ---------- Delivery radio logic ----------
+  var deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+  var accomFields = document.getElementById('accomFields');
+  var travelFields = document.getElementById('travelFields');
+  function updateDeliveryUI(){
+    var val = document.querySelector('input[name="delivery"]:checked').value;
+    document.querySelectorAll('#deliveryGroup label').forEach(function(l){l.classList.remove('selected');});
+    document.querySelector('input[name="delivery"]:checked').closest('label').classList.add('selected');
+    if(val==='centre'){
+      travelFields.style.display='none';
+    } else {
+      travelFields.style.display='block';
+      accomFields.style.display = (val==='remote') ? 'grid' : 'none';
+    }
+    calcAll();
+  }
+  deliveryRadios.forEach(function(r){ r.addEventListener('change', updateDeliveryUI); });
+  updateDeliveryUI();
+
+  // ---------- Assumptions persistence ----------
+  var assumptionIds = ['rFacilitator','rAssessor','rModerator','rExternalMod','rInvigilation','rKm','rAccom','rSubsistence','rVenue',
+    'rMaterials','rPPE','rRegistration','rEISA','rCert','rInsurance','rContingency','rFinancing','rCompliance','rOverhead','rTargetMargin','rMinMargin','rVAT'];
+  var defaultAssumptions = {};
+  assumptionIds.forEach(function(id){ defaultAssumptions[id] = document.getElementById(id).value; });
+
+  async function loadAssumptions(){
+    var saved = await storeGet('tiespro_assumptions');
+    if(saved){
+      try{
+        var obj = JSON.parse(saved);
+        assumptionIds.forEach(function(id){ if(obj[id]!==undefined) document.getElementById(id).value = obj[id]; });
+      }catch(e){}
+    }
+    calcAll();
+  }
+  document.getElementById('btnSaveAssumptions').addEventListener('click', async function(){
+    var obj = {};
+    assumptionIds.forEach(function(id){ obj[id]=document.getElementById(id).value; });
+    await storeSet('tiespro_assumptions', JSON.stringify(obj));
+    toast('Default assumptions saved for all future quotes.');
+    calcAll();
+  });
+  document.getElementById('btnResetAssumptions').addEventListener('click', function(){
+    assumptionIds.forEach(function(id){ document.getElementById(id).value = defaultAssumptions[id]; });
+    calcAll();
+    toast('Assumptions reset to suggested defaults (not yet saved).');
+  });
+
+  assumptionIds.forEach(function(id){ document.getElementById(id).addEventListener('input', calcAll); });
+
+  // ---------- Build-quote field listeners ----------
+  ['clientName','quoteRef','preparedBy','quoteDate','nqfLevel','numLearners','trainingDays','assessmentDays','moderationDays',
+   'durationMonths','distanceKm','numTrips','travellers','nights','personDaysAway'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', calcAll);
+  });
+  ['eisaRequired','externalMod','ppeRequired','venueRequired'].forEach(function(id){
+    document.getElementById(id).addEventListener('change', calcAll);
+  });
+
+  // ---------- Core calculation ----------
+  var lastCalc = {};
+
+  function calcAll(){
+    var v = function(id){ return parseFloat(document.getElementById(id).value) || 0; };
+
+    var numLearners = v('numLearners');
+    var trainingDays = v('trainingDays');
+    var assessmentDays = v('assessmentDays');
+    var moderationDays = v('moderationDays');
+    var delivery = document.querySelector('input[name="delivery"]:checked').value;
+    var eisaOn = document.getElementById('eisaRequired').checked;
+    var externalModOn = document.getElementById('externalMod').checked;
+    var ppeOn = document.getElementById('ppeRequired').checked;
+    var venueOn = document.getElementById('venueRequired').checked;
+
+    var rFacilitator=v('rFacilitator'), rAssessor=v('rAssessor'), rModerator=v('rModerator'),
+        rExternalMod=v('rExternalMod'), rInvigilation=v('rInvigilation'),
+        rKm=v('rKm'), rAccom=v('rAccom'), rSubsistence=v('rSubsistence'), rVenue=v('rVenue'),
+        rMaterials=v('rMaterials'), rPPE=v('rPPE'), rRegistration=v('rRegistration'), rEISA=v('rEISA'),
+        rCert=v('rCert'), rInsurance=v('rInsurance'),
+        rContingency=v('rContingency'), rFinancing=v('rFinancing'), rCompliance=v('rCompliance'),
+        rOverhead=v('rOverhead'), rTargetMargin=v('rTargetMargin'), rMinMargin=v('rMinMargin'), rVAT=v('rVAT');
+
+    // People costs
+    var costFacilitator = rFacilitator * trainingDays;
+    var costAssessor = rAssessor * assessmentDays;
+    var costModerator = rModerator * moderationDays;
+    var costExternalMod = externalModOn ? rExternalMod : 0;
+    var costInvigilation = eisaOn ? rInvigilation : 0;
+    var peopleTotal = costFacilitator + costAssessor + costModerator + costExternalMod + costInvigilation;
+
+    // Travel & logistics
+    var distanceKm = v('distanceKm'), numTrips = v('numTrips'), travellers = v('travellers'),
+        nights = v('nights'), personDaysAway = v('personDaysAway');
+    var costTravel = 0, costAccom = 0, costSubsistence = 0, costVenue = 0;
+    if(delivery !== 'centre'){
+      costTravel = distanceKm * 2 * rKm * numTrips * travellers;
+      if(delivery === 'remote'){
+        costAccom = nights * rAccom * travellers;
+        costSubsistence = personDaysAway * rSubsistence;
+      }
+    }
+    if(venueOn){
+      costVenue = rVenue * (trainingDays + assessmentDays);
+    }
+    var logisticsTotal = costTravel + costAccom + costSubsistence + costVenue;
+
+    // Per-learner costs
+    var costMaterials = rMaterials * numLearners;
+    var costPPE = ppeOn ? (rPPE * numLearners) : 0;
+    var costRegistration = rRegistration * numLearners;
+    var costEISAfees = eisaOn ? (rEISA * numLearners) : 0;
+    var costCert = rCert * numLearners;
+    var costInsurance = rInsurance * numLearners;
+    var learnerTotal = costMaterials + costPPE + costRegistration + costEISAfees + costCert + costInsurance;
+
+    var subtotalDirect = peopleTotal + logisticsTotal + learnerTotal;
+
+    // Hidden/consequential buffers
+    var contingencyAmt = subtotalDirect * (rContingency/100);
+    var financingAmt = subtotalDirect * (rFinancing/100);
+    var complianceAmt = subtotalDirect * (rCompliance/100);
+    var hiddenTotal = contingencyAmt + financingAmt + complianceAmt;
+
+    var costPlusHidden = subtotalDirect + hiddenTotal;
+
+    // Overhead
+    var overheadAmt = costPlusHidden * (rOverhead/100);
+    var fullyLoadedCost = costPlusHidden + overheadAmt;
+
+    // List price from target margin
+    var marginFrac = Math.min(0.95, Math.max(0, rTargetMargin/100));
+    var listPrice = fullyLoadedCost / (1 - marginFrac);
+
+    // Discount
+    var discountPct = parseFloat(discountSlider.value);
+    var finalPrice = listPrice * (1 - discountPct/100);
+    var marginAtDiscount = finalPrice > 0 ? (finalPrice - fullyLoadedCost) / finalPrice : 0;
+
+    // Max discount that still hits the minimum margin floor
+    var minMarginFrac = rMinMargin/100;
+    var priceAtFloor = fullyLoadedCost / (1 - minMarginFrac);
+    var maxDiscountAtFloor = listPrice > 0 ? (1 - priceAtFloor/listPrice) * 100 : 0;
+
+    lastCalc = {
+      numLearners: numLearners, delivery: delivery, eisaOn: eisaOn,
+      peopleTotal: peopleTotal, costFacilitator: costFacilitator, costAssessor: costAssessor, costModerator: costModerator,
+      costExternalMod: costExternalMod, costInvigilation: costInvigilation,
+      logisticsTotal: logisticsTotal, costTravel: costTravel, costAccom: costAccom, costSubsistence: costSubsistence, costVenue: costVenue,
+      learnerTotal: learnerTotal, costMaterials: costMaterials, costPPE: costPPE, costRegistration: costRegistration,
+      costEISAfees: costEISAfees, costCert: costCert, costInsurance: costInsurance,
+      subtotalDirect: subtotalDirect, contingencyAmt: contingencyAmt, financingAmt: financingAmt, complianceAmt: complianceAmt,
+      hiddenTotal: hiddenTotal, overheadAmt: overheadAmt, fullyLoadedCost: fullyLoadedCost,
+      listPrice: listPrice, discountPct: discountPct, finalPrice: finalPrice, marginAtDiscount: marginAtDiscount,
+      maxDiscountAtFloor: maxDiscountAtFloor, rVAT: rVAT, rMinMargin: rMinMargin,
+      trainingDays: trainingDays, assessmentDays: assessmentDays, moderationDays: moderationDays
+    };
+
+    renderBreakdown();
+  }
+
+  function renderBreakdown(){
+    var c = lastCalc;
+    var t = document.getElementById('costTable');
+    var rows = [];
+    function cat(label){ rows.push('<tr class="category"><td colspan="2">'+label+'</td></tr>'); }
+    function line(label, amt){ rows.push('<tr><td>'+label+'</td><td class="amt">'+fmtR(amt)+'</td></tr>'); }
+
+    cat('Facilitation, Assessment &amp; Moderation');
+    line('Facilitator ('+c.trainingDays+' days)', c.costFacilitator);
+    line('Assessor ('+c.assessmentDays+' days)', c.costAssessor);
+    line('Internal moderator ('+c.moderationDays+' days)', c.costModerator);
+    if(c.costExternalMod) line('External moderation fee', c.costExternalMod);
+    if(c.costInvigilation) line('EISA invigilation', c.costInvigilation);
+
+    cat('Travel, Accommodation &amp; Venue');
+    line('Travel (km-based)', c.costTravel);
+    line('Accommodation', c.costAccom);
+    line('Subsistence', c.costSubsistence);
+    line('Venue hire', c.costVenue);
+
+    cat('Per-Learner Materials &amp; Compliance ('+c.numLearners+' learners)');
+    line('Materials / workbooks', c.costMaterials);
+    line('PPE / consumables', c.costPPE);
+    line('SETA/QCTO registration &amp; admin', c.costRegistration);
+    if(c.costEISAfees) line('EISA registration fees', c.costEISAfees);
+    line('Certification issuing', c.costCert);
+    line('Learner insurance / liability cover', c.costInsurance);
+
+    rows.push('<tr class="total"><td>Subtotal Direct Cost</td><td class="amt">'+fmtR(c.subtotalDirect)+'</td></tr>');
+
+    cat('Hidden &amp; Consequential Cost Buffers');
+    line('Contingency (no-shows, re-assessments, delays)', c.contingencyAmt);
+    line('Cost-of-capital / cash-flow financing', c.financingAmt);
+    line('Compliance &amp; accreditation overhead', c.complianceAmt);
+    line('Company overhead allocation', c.overheadAmt);
+
+    rows.push('<tr class="total"><td>Fully Loaded Cost</td><td class="amt">'+fmtR(c.fullyLoadedCost)+'</td></tr>');
+    rows.push('<tr class="sub"><td>List Price at target margin (before discount)</td><td class="amt">'+fmtR(c.listPrice)+'</td></tr>');
+
+    t.innerHTML = rows.join('');
+
+    document.getElementById('discountVal').textContent = c.discountPct + '%';
+    document.getElementById('marginAtDiscount').textContent = 'Margin at this discount: ' + (c.marginAtDiscount*100).toFixed(1) + '%';
+
+    document.getElementById('finalPrice').textContent = fmtR(c.finalPrice);
+    var perLearner = c.numLearners>0 ? c.finalPrice/c.numLearners : 0;
+    document.getElementById('perLearnerPrice').textContent = fmtR(perLearner) + ' per learner · excl. VAT (' + c.rVAT + '% VAT = ' + fmtR(c.finalPrice*c.rVAT/100) + ')';
+
+    var ind = document.getElementById('marginIndicator');
+    var marginPct = c.marginAtDiscount*100;
+    if(marginPct >= c.rMinMargin){
+      ind.className='indicator green';
+      ind.innerHTML='<span class="dot"></span> Healthy margin: '+marginPct.toFixed(1)+'% — at or above your '+c.rMinMargin+'% floor. Safe to quote.';
+    } else if(marginPct >= 0){
+      ind.className='indicator amber';
+      ind.innerHTML='<span class="dot"></span> Below target: '+marginPct.toFixed(1)+'% margin (floor is '+c.rMinMargin+'%). Maximum discount to stay at the floor is '+Math.max(0,c.maxDiscountAtFloor).toFixed(1)+'%. Get manager sign-off before sending.';
+    } else {
+      ind.className='indicator red';
+      ind.innerHTML='<span class="dot"></span> Loss-making at '+marginPct.toFixed(1)+'% margin. Do not send this quote — reduce discount or revise scope.';
+    }
+  }
+
+  // ---------- Save / Load quotes ----------
+  document.getElementById('btnSave').addEventListener('click', async function(){
+    var id = 'quote:'+Date.now();
+    var record = {
+      id:id,
+      clientName: document.getElementById('clientName').value || 'Unnamed client',
+      quoteRef: document.getElementById('quoteRef').value,
+      preparedBy: document.getElementById('preparedBy').value,
+      quoteDate: document.getElementById('quoteDate').value,
+      qualification: document.getElementById('qualification').value,
+      nqfLevel: document.getElementById('nqfLevel').value,
+      numLearners: document.getElementById('numLearners').value,
+      trainingDays: document.getElementById('trainingDays').value,
+      assessmentDays: document.getElementById('assessmentDays').value,
+      moderationDays: document.getElementById('moderationDays').value,
+      durationMonths: document.getElementById('durationMonths').value,
+      eisaRequired: document.getElementById('eisaRequired').checked,
+      externalMod: document.getElementById('externalMod').checked,
+      ppeRequired: document.getElementById('ppeRequired').checked,
+      venueRequired: document.getElementById('venueRequired').checked,
+      delivery: document.querySelector('input[name="delivery"]:checked').value,
+      distanceKm: document.getElementById('distanceKm').value,
+      numTrips: document.getElementById('numTrips').value,
+      travellers: document.getElementById('travellers').value,
+      nights: document.getElementById('nights').value,
+      personDaysAway: document.getElementById('personDaysAway').value,
+      discountPct: discountSlider.value,
+      finalPrice: lastCalc.finalPrice,
+      fullyLoadedCost: lastCalc.fullyLoadedCost,
+      marginAtDiscount: lastCalc.marginAtDiscount,
+      savedAt: new Date().toISOString()
+    };
+    await storeSet(id, JSON.stringify(record));
+    toast('Quote saved: '+record.quoteRef);
+  });
+
+  async function renderSavedList(){
+    var keys = await storeListKeys('quote:');
+    var wrap = document.getElementById('savedListWrap');
+    if(!keys || keys.length===0){
+      wrap.innerHTML = '<div class="emptystate">No quotes saved yet — build a quote and click "Save Quote".</div>';
+      return;
+    }
+    var records = [];
+    for(var i=0;i<keys.length;i++){
+      var val = await storeGet(keys[i]);
+      if(val){ try{ records.push(JSON.parse(val)); }catch(e){} }
+    }
+    records.sort(function(a,b){ return new Date(b.savedAt) - new Date(a.savedAt); });
+
+    var html = '<table class="savedlist"><tr><th>Quote Ref</th><th>Client</th><th>Date</th><th>Learners</th><th>Discount</th><th>Price</th><th>Margin</th><th></th></tr>';
+    records.forEach(function(r){
+      var marginPct = (r.marginAtDiscount*100);
+      var pillClass = marginPct >= 20 ? 'green' : (marginPct>=0 ? 'amber':'red');
+      html += '<tr>'+
+        '<td>'+r.quoteRef+'</td>'+
+        '<td>'+r.clientName+'</td>'+
+        '<td>'+r.quoteDate+'</td>'+
+        '<td>'+r.numLearners+'</td>'+
+        '<td>'+r.discountPct+'%</td>'+
+        '<td>'+fmtR(r.finalPrice)+'</td>'+
+        '<td><span class="pill '+pillClass+'">'+marginPct.toFixed(1)+'%</span></td>'+
+        '<td><button class="btn ghost" data-load="'+r.id+'" style="padding:5px 10px;font-size:11.5px;">Load</button> '+
+        '<button class="btn danger" data-del="'+r.id+'" style="padding:5px 10px;font-size:11.5px;">Delete</button></td>'+
+        '</tr>';
+    });
+    html += '</table>';
+    wrap.innerHTML = html;
+
+    wrap.querySelectorAll('[data-load]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var val = await storeGet(btn.dataset.load);
+        if(val){ loadQuote(JSON.parse(val)); }
+      });
+    });
+    wrap.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        await storeDelete(btn.dataset.del);
+        renderSavedList();
+        toast('Quote deleted.');
+      });
+    });
+  }
+
+  function loadQuote(r){
+    document.getElementById('clientName').value = r.clientName;
+    document.getElementById('quoteRef').value = r.quoteRef;
+    document.getElementById('preparedBy').value = r.preparedBy;
+    document.getElementById('quoteDate').value = r.quoteDate;
+    document.getElementById('qualification').value = r.qualification;
+    document.getElementById('nqfLevel').value = r.nqfLevel;
+    document.getElementById('numLearners').value = r.numLearners;
+    document.getElementById('trainingDays').value = r.trainingDays;
+    document.getElementById('assessmentDays').value = r.assessmentDays;
+    document.getElementById('moderationDays').value = r.moderationDays;
+    document.getElementById('durationMonths').value = r.durationMonths;
+    document.getElementById('eisaRequired').checked = r.eisaRequired;
+    document.getElementById('externalMod').checked = r.externalMod;
+    document.getElementById('ppeRequired').checked = r.ppeRequired;
+    document.getElementById('venueRequired').checked = r.venueRequired;
+    document.querySelector('input[name="delivery"][value="'+r.delivery+'"]').checked = true;
+    document.getElementById('distanceKm').value = r.distanceKm;
+    document.getElementById('numTrips').value = r.numTrips;
+    document.getElementById('travellers').value = r.travellers;
+    document.getElementById('nights').value = r.nights;
+    document.getElementById('personDaysAway').value = r.personDaysAway;
+    discountSlider.value = r.discountPct;
+    updateDeliveryUI();
+    document.querySelector('.tab-btn[data-tab="build"]').click();
+    toast('Quote loaded: '+r.quoteRef);
+  }
+
+  document.getElementById('btnReset').addEventListener('click', function(){
+    if(confirm('Clear all fields on this quote?')){
+      document.getElementById('clientName').value='';
+      qRef.value = genRef();
+      document.getElementById('preparedBy').value='';
+      document.getElementById('numLearners').value=20;
+      document.getElementById('trainingDays').value=20;
+      document.getElementById('assessmentDays').value=4;
+      document.getElementById('moderationDays').value=2;
+      document.getElementById('distanceKm').value=0;
+      document.getElementById('numTrips').value=1;
+      document.getElementById('travellers').value=1;
+      document.getElementById('nights').value=0;
+      document.getElementById('personDaysAway').value=0;
+      discountSlider.value=0;
+      document.querySelector('input[name="delivery"][value="centre"]').checked=true;
+      updateDeliveryUI();
+      calcAll();
+    }
+  });
+
+  // ---------- Generate client-facing printable quote ----------
+  document.getElementById('btnGenerate').addEventListener('click', function(){
+    var c = lastCalc;
+    var clientName = document.getElementById('clientName').value || 'Prospective Client';
+    var qualText = document.getElementById('qualification').selectedOptions[0].text;
+    var nqf = document.getElementById('nqfLevel').value;
+    var ref = document.getElementById('quoteRef').value;
+    var date = document.getElementById('quoteDate').value;
+    var preparedBy = document.getElementById('preparedBy').value;
+
+    document.getElementById('pqMeta').innerHTML =
+      'Quote Reference: <b>'+ref+'</b><br>Date: '+date+'<br>Prepared by: '+(preparedBy||'Tiespro Training Institute')+'<br>Valid for 30 days';
+
+    document.getElementById('pqClientBlock').innerHTML =
+      '<b>'+clientName+'</b><br>Programme: '+qualText+(nqf?(' — NQF Level '+nqf):'')+'<br>Number of learners: '+c.numLearners;
+
+    var deliveryLabel = c.delivery==='centre' ? 'Tiespro Training Centre, Durban' : (c.delivery==='local' ? 'Client site (local delivery)' : 'Client site (delivery with overnight logistics)');
+    document.getElementById('pqSummaryTable').innerHTML =
+      '<tr><th>Item</th><th>Detail</th></tr>'+
+      '<tr><td>Training days</td><td>'+c.trainingDays+'</td></tr>'+
+      '<tr><td>Assessment days</td><td>'+c.assessmentDays+'</td></tr>'+
+      '<tr><td>Delivery location</td><td>'+deliveryLabel+'</td></tr>'+
+      '<tr><td>External examination (EISA)</td><td>'+(c.eisaOn?'Included':'Not applicable')+'</td></tr>';
+
+    var vatAmt = c.finalPrice * c.rVAT/100;
+    var priceRows =
+      '<tr><th>Line Item</th><th style="text-align:right;">Amount</th></tr>'+
+      '<tr><td>Training Delivery (facilitation)</td><td class="amt">'+fmtR(c.costFacilitator)+'</td></tr>'+
+      '<tr><td>Assessment &amp; Moderation</td><td class="amt">'+fmtR(c.costAssessor + c.costModerator + c.costExternalMod)+'</td></tr>';
+    if(c.eisaOn) priceRows += '<tr><td>Examination (EISA) &amp; Invigilation</td><td class="amt">'+fmtR(c.costEISAfees + c.costInvigilation)+'</td></tr>';
+    priceRows += '<tr><td>Travel &amp; Logistics</td><td class="amt">'+fmtR(c.logisticsTotal)+'</td></tr>';
+    priceRows += '<tr><td>Learner Materials &amp; Compliance</td><td class="amt">'+fmtR(c.costMaterials + c.costPPE + c.costRegistration + c.costCert + c.costInsurance)+'</td></tr>';
+    if(c.discountPct>0){
+      priceRows += '<tr><td>Programme Investment (before discount)</td><td class="amt">'+fmtR(c.listPrice)+'</td></tr>';
+      priceRows += '<tr><td>Discount ('+c.discountPct+'%)</td><td class="amt">-'+fmtR(c.listPrice - c.finalPrice)+'</td></tr>';
+    }
+    priceRows += '<tr class="total"><td>Total Investment (excl. VAT)</td><td class="amt">'+fmtR(c.finalPrice)+'</td></tr>';
+    priceRows += '<tr><td>VAT ('+c.rVAT+'%)</td><td class="amt">'+fmtR(vatAmt)+'</td></tr>';
+    priceRows += '<tr class="total"><td>Total Investment (incl. VAT)</td><td class="amt">'+fmtR(c.finalPrice+vatAmt)+'</td></tr>';
+    priceRows += '<tr><td>Per learner (excl. VAT)</td><td class="amt">'+fmtR(c.finalPrice/(c.numLearners||1))+'</td></tr>';
+
+    document.getElementById('pqPriceTable').innerHTML = priceRows;
+
+    window.print();
+  });
+
+  // ---------- Init ----------
+  loadAssumptions();
+})();
+</script>
+</body>
+</html>
