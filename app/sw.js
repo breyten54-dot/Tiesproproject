@@ -1,9 +1,11 @@
 // Bump this on every deploy so returning staff pick up the new version
 // instead of a stale cached copy.
-const CACHE_NAME = 'tiespro-costing-v1';
+const CACHE_NAME = 'tiespro-site-v2';
 const ASSETS = [
   './',
   './index.html',
+  './home.html',
+  './tool.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

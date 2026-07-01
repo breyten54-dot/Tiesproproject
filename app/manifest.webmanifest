@@ -2,7 +2,7 @@
   "name": "Tiespro Costing & Quotation Tool",
   "short_name": "Tiespro Costing",
   "description": "Internal costing and client quotation tool for Tiespro Training Institute.",
-  "start_url": "./index.html",
+  "start_url": "./tool.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#1F3864",
