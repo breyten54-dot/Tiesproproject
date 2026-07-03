@@ -535,14 +535,28 @@
 (function(){
 
   // ---------- Storage helpers ----------
-  // Uses the native storage bridge if the page is hosted inside a wrapper app;
-  // otherwise falls back to an in-memory store.
+  // Three tiers: the native storage bridge if hosted inside a wrapper app;
+  // otherwise real localStorage, namespaced, so staff directory/sessions/
+  // saved quotes actually survive a reload when this file is opened directly
+  // in a plain browser (the normal way it's used - nothing in this repo
+  // provides a window.storage wrapper); and only as a last resort an
+  // in-memory object (e.g. if localStorage itself throws, as in some
+  // private-browsing modes).
+  var STORE_PREFIX = 'tiespro_costing_standalone_v1:';
   var memoryStore = {};
   var hasWindowStorage = typeof window.storage !== 'undefined' && window.storage;
+  var hasLocalStorage = (function(){
+    try{ var k='__tiespro_test__'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return true; }
+    catch(e){ return false; }
+  })();
 
   async function storeGet(key){
     if(hasWindowStorage){
       try{ var r = await window.storage.get(key,false); return r ? r.value : null; }catch(e){ return null; }
+    }
+    if(hasLocalStorage){
+      var v = localStorage.getItem(STORE_PREFIX+key);
+      return v===null ? null : v;
     }
     return memoryStore.hasOwnProperty(key) ? memoryStore[key] : null;
   }
@@ -550,17 +564,31 @@
     if(hasWindowStorage){
       try{ await window.storage.set(key,value,false); return true; }catch(e){ return false; }
     }
+    if(hasLocalStorage){
+      try{ localStorage.setItem(STORE_PREFIX+key, value); return true; }catch(e){ return false; }
+    }
     memoryStore[key]=value; return true;
   }
   async function storeListKeys(prefix){
     if(hasWindowStorage){
       try{ var r = await window.storage.list(prefix,false); return r ? r.keys : []; }catch(e){ return []; }
     }
+    if(hasLocalStorage){
+      var keys=[];
+      for(var i=0;i<localStorage.length;i++){
+        var full = localStorage.key(i);
+        if(full && full.indexOf(STORE_PREFIX+prefix)===0) keys.push(full.slice(STORE_PREFIX.length));
+      }
+      return keys;
+    }
     return Object.keys(memoryStore).filter(function(k){return k.indexOf(prefix)===0;});
   }
   async function storeDelete(key){
     if(hasWindowStorage){
       try{ await window.storage.delete(key,false); return true; }catch(e){ return false; }
+    }
+    if(hasLocalStorage){
+      try{ localStorage.removeItem(STORE_PREFIX+key); return true; }catch(e){ return false; }
     }
     delete memoryStore[key]; return true;
   }
