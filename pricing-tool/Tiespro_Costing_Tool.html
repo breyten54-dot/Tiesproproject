@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tiespro Training Institute — Costing &amp; Quotation Tool</title>
+<meta name="description" content="Internal costing and quotation tool for Tiespro Training Institute — build client-ready training quotes with locality, facilitator, assessment and EISA costs built in.">
+<meta name="theme-color" content="#1F3864">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tiespro Costing">
 <style>
   :root{
     --navy:#1F3864; --navy-dark:#152647; --navy-light:#2E4A7D;
@@ -16,7 +23,8 @@
     --radius:10px;
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);}
+  html,body{height:100%;}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh;}
   header.app-header{background:var(--navy);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
   header.app-header .brand{display:flex;flex-direction:column;}
   header.app-header .brand .name{font-size:20px;font-weight:800;letter-spacing:.3px;}
@@ -28,7 +36,7 @@
   nav.tabs button.active{color:#fff;border-bottom:3px solid var(--gold);}
   nav.tabs button:hover{color:#fff;}
 
-  main{max-width:1300px;margin:0 auto;padding:22px 20px 60px;}
+  main{max-width:1300px;margin:0 auto;padding:22px 20px 60px;flex:1;width:100%;}
   .tabpanel{display:none;}
   .tabpanel.active{display:block;}
 
@@ -42,12 +50,17 @@
   .card h3:first-of-type{border-top:none;padding-top:0;margin-top:0;}
 
   .field{margin-bottom:13px;}
-  .field label{display:block;font-size:12.5px;font-weight:700;color:#3A4150;margin-bottom:5px;}
+  fieldset.field{border:none;padding:0;margin:0 0 13px;min-width:0;}
+  .field label, .field legend{display:block;font-size:12.5px;font-weight:700;color:#3A4150;margin-bottom:5px;}
+  .field legend{padding:0;}
   .field .hint{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:4px;}
   .field input[type=text],.field input[type=number],.field select,.field input[type=date]{
     width:100%;padding:9px 10px;border:1px solid #CBD2DD;border-radius:7px;font-size:13.5px;font-family:inherit;background:#fff;color:var(--text);
   }
   .field input:focus,.field select:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(31,56,100,.12);}
+  .field input.invalid,.field select.invalid{border-color:var(--red);background:var(--red-bg);}
+  .field .error-msg{display:none;font-size:11px;color:var(--red);margin-top:4px;font-weight:700;}
+  .field input.invalid ~ .error-msg,.field select.invalid ~ .error-msg{display:block;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
   @media (max-width:560px){.row2,.row3{grid-template-columns:1fr;}}
@@ -115,9 +128,12 @@
   /* Print / client quote */
   #printArea{display:none;}
   @media print{
+    @page { margin: 18mm 16mm; }
     body *{visibility:hidden;}
     #printArea, #printArea *{visibility:visible;}
-    #printArea{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
+    #printArea{display:block;position:absolute;top:0;left:0;width:100%;padding:0;color:#000;}
+    #printArea h1, #printArea h2, #printArea h3, #printArea table, #printArea .pq-terms{page-break-inside:avoid;}
+    #printArea tr{page-break-inside:avoid;}
   }
   .pq-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--gold);padding-bottom:14px;margin-bottom:20px;}
   .pq-header h1{color:var(--navy);font-size:22px;margin:0 0 4px;}
@@ -125,7 +141,7 @@
   .pq-meta{text-align:right;font-size:12px;color:#3A4150;line-height:1.6;}
   .pq-section-title{font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:var(--navy);border-bottom:1px solid var(--line);padding-bottom:6px;margin:20px 0 10px;}
   table.pq-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px;}
-  table.pq-table th{text-align:left;background:var(--navy);color:#fff;padding:8px 10px;font-size:12px;}
+  table.pq-table th{text-align:left;background:var(--navy);color:#fff;padding:8px 10px;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   table.pq-table td{padding:8px 10px;border-bottom:1px solid #EEF0F3;}
   table.pq-table td.amt{text-align:right;font-variant-numeric:tabular-nums;}
   table.pq-table tr.total td{font-weight:800;border-top:2px solid var(--navy);font-size:14px;}
@@ -133,29 +149,40 @@
 
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .25s;z-index:999;}
   .toast.show{opacity:1;}
+
+  /* Accessibility */
+  .skip-link{position:absolute;top:-40px;left:0;background:var(--navy);color:#fff;padding:8px 14px;z-index:1000;font-size:13px;font-weight:700;text-decoration:none;border-radius:0 0 8px 0;}
+  .skip-link:focus{top:0;}
+  *:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible{outline-offset:2px;}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 
 <header class="app-header">
   <div class="brand">
+    <a href="../app/home.html" style="color:#fff;text-decoration:none;font-size:11px;font-weight:700;color:#9FB0CE;letter-spacing:.3px;">&larr; Tiespro Home</a>
     <div class="name">TIESPRO TRAINING INSTITUTE</div>
     <div class="tag">Costing &amp; Quotation Tool</div>
   </div>
-  <div class="meta">TETA Accreditation 06-157 &nbsp;|&nbsp; Praeto Group Holdings<br>For internal staff use — generates client-ready quotations</div>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <button id="btnInstall" class="btn gold" style="display:none;padding:8px 14px;font-size:12.5px;">Install App</button>
+    <div class="meta">TETA Accreditation 06-157 &nbsp;|&nbsp; Praeto Group Holdings<br>For internal staff use — generates client-ready quotations</div>
+  </div>
 </header>
 
-<nav class="tabs">
-  <button class="tab-btn active" data-tab="build">Build Quote</button>
-  <button class="tab-btn" data-tab="assumptions">Rate Assumptions</button>
-  <button class="tab-btn" data-tab="saved">Saved Quotes</button>
-  <button class="tab-btn" data-tab="help">How This Works</button>
+<nav class="tabs" aria-label="Quote sections" role="tablist">
+  <button class="tab-btn active" data-tab="build" role="tab" aria-selected="true" id="tab-btn-build" aria-controls="tab-build">Build Quote</button>
+  <button class="tab-btn" data-tab="assumptions" role="tab" aria-selected="false" id="tab-btn-assumptions" aria-controls="tab-assumptions">Rate Assumptions</button>
+  <button class="tab-btn" data-tab="saved" role="tab" aria-selected="false" id="tab-btn-saved" aria-controls="tab-saved">Saved Quotes</button>
+  <button class="tab-btn" data-tab="help" role="tab" aria-selected="false" id="tab-btn-help" aria-controls="tab-help">How This Works</button>
 </nav>
 
-<main>
+<main id="main">
 
 <!-- ============ BUILD QUOTE TAB ============ -->
-<div class="tabpanel active" id="tab-build">
+<div class="tabpanel active" id="tab-build" role="tabpanel" aria-labelledby="tab-btn-build">
   <div class="grid">
     <div>
 
@@ -163,12 +190,12 @@
         <h2>1. Client &amp; Programme Details</h2>
         <p class="sub">Basic information for this quotation</p>
         <div class="row2">
-          <div class="field"><label>Client / Company Name</label><input type="text" id="clientName" placeholder="e.g. Value Logistics"></div>
-          <div class="field"><label>Quote Reference</label><input type="text" id="quoteRef"></div>
+          <div class="field"><label>Client / Company Name</label><input type="text" id="clientName" placeholder="e.g. Value Logistics" aria-required="true"><span class="error-msg" id="err-clientName">Enter a client name</span></div>
+          <div class="field"><label>Quote Reference</label><input type="text" id="quoteRef" aria-required="true"><span class="error-msg" id="err-quoteRef">Enter a quote reference</span></div>
         </div>
         <div class="row2">
           <div class="field"><label>Prepared By</label><input type="text" id="preparedBy" placeholder="Staff member name"></div>
-          <div class="field"><label>Quote Date</label><input type="date" id="quoteDate"></div>
+          <div class="field"><label>Quote Date</label><input type="date" id="quoteDate" aria-required="true"><span class="error-msg" id="err-quoteDate">Select a quote date</span></div>
         </div>
 
         <h3>Programme</h3>
@@ -190,7 +217,7 @@
           <div class="field"><label>NQF Level</label><input type="text" id="nqfLevel"></div>
         </div>
         <div class="row3">
-          <div class="field"><label>Number of Learners</label><input type="number" id="numLearners" value="20" min="1"></div>
+          <div class="field"><label>Number of Learners</label><input type="number" id="numLearners" value="20" min="1" aria-required="true"><span class="error-msg" id="err-numLearners">At least 1 learner required</span></div>
           <div class="field"><label>Training Days</label><input type="number" id="trainingDays" value="20" min="0"></div>
           <div class="field"><label>Assessment Days</label><input type="number" id="assessmentDays" value="4" min="0"></div>
         </div>
@@ -206,8 +233,8 @@
       <div class="card">
         <h2>2. Locality &amp; Delivery Logistics</h2>
         <p class="sub">Drives travel, accommodation and venue costs — the most commonly under-quoted line items</p>
-        <div class="field">
-          <label>Delivery Location</label>
+        <fieldset class="field">
+          <legend>Delivery Location</legend>
           <div class="radiogroup" id="deliveryGroup">
             <label class="selected"><input type="radio" name="delivery" value="centre" checked> Tiespro Training Centre (Durban)
               <span class="desc">No travel or accommodation costs. Client learners travel to Tiespro.</span></label>
@@ -216,13 +243,13 @@
             <label><input type="radio" name="delivery" value="remote"> Client Site — Remote (requires overnight stay)
               <span class="desc">Travel + accommodation + subsistence for each site visit.</span></label>
           </div>
-        </div>
+        </fieldset>
         <div id="travelFields">
           <div class="row3">
             <div class="field"><label>One-way distance from Durban (km)</label><input type="number" id="distanceKm" value="0" min="0"></div>
             <div class="field"><label>Number of return trips</label><input type="number" id="numTrips" value="1" min="0">
               <span class="hint">Local: usually 1 trip per training/assessment day. Remote: 1 trip per site-visit block.</span></div>
-            <div class="field"><label>Travelling personnel per trip</label><input type="number" id="travellers" value="1" min="1"></div>
+            <div class="field"><label>Travelling personnel per trip</label><input type="number" id="travellers" value="1" min="1" aria-required="true"><span class="error-msg" id="err-travellers">At least 1 traveller required</span></div>
           </div>
           <div class="row2" id="accomFields" style="display:none;">
             <div class="field"><label>Accommodation nights required (total)</label><input type="number" id="nights" value="0" min="0"></div>
@@ -272,7 +299,7 @@
 </div>
 
 <!-- ============ ASSUMPTIONS TAB ============ -->
-<div class="tabpanel" id="tab-assumptions">
+<div class="tabpanel" id="tab-assumptions" role="tabpanel" aria-labelledby="tab-btn-assumptions">
   <div class="card">
     <h2>Rate Assumptions &amp; Cost Benchmarks</h2>
     <p class="sub">These are the default unit rates every quote is built from. Review quarterly — several are tied to published market/SARS figures that change annually.</p>
@@ -281,37 +308,37 @@
     <div class="assumpgrid">
       <div>
         <h3>People Costs (per day, ZAR)</h3>
-        <div class="field"><label>Facilitator day rate</label><input type="number" id="rFacilitator" value="3500"></div>
-        <div class="field"><label>Assessor day rate</label><input type="number" id="rAssessor" value="3200"></div>
-        <div class="field"><label>Internal moderator day rate</label><input type="number" id="rModerator" value="3800"></div>
-        <div class="field"><label>External moderator fee (flat, if required)</label><input type="number" id="rExternalMod" value="4500"></div>
-        <div class="field"><label>EISA invigilation fee (flat, per session)</label><input type="number" id="rInvigilation" value="2500"></div>
+        <div class="field"><label>Facilitator day rate</label><input type="number" id="rFacilitator" value="3500" min="0"></div>
+        <div class="field"><label>Assessor day rate</label><input type="number" id="rAssessor" value="3200" min="0"></div>
+        <div class="field"><label>Internal moderator day rate</label><input type="number" id="rModerator" value="3800" min="0"></div>
+        <div class="field"><label>External moderator fee (flat, if required)</label><input type="number" id="rExternalMod" value="4500" min="0"></div>
+        <div class="field"><label>EISA invigilation fee (flat, per session)</label><input type="number" id="rInvigilation" value="2500" min="0"></div>
       </div>
       <div>
         <h3>Travel &amp; Logistics</h3>
-        <div class="field"><label>Travel rate per km (round trip auto ×2)</label><input type="number" id="rKm" value="4.95" step="0.01"></div>
-        <div class="field"><label>Accommodation per night, per person</label><input type="number" id="rAccom" value="1250"></div>
-        <div class="field"><label>Subsistence per person-day away</label><input type="number" id="rSubsistence" value="595"></div>
-        <div class="field"><label>Venue hire per day (if required)</label><input type="number" id="rVenue" value="2200"></div>
+        <div class="field"><label>Travel rate per km (round trip auto ×2)</label><input type="number" id="rKm" value="4.95" step="0.01" min="0"></div>
+        <div class="field"><label>Accommodation per night, per person</label><input type="number" id="rAccom" value="1250" min="0"></div>
+        <div class="field"><label>Subsistence per person-day away</label><input type="number" id="rSubsistence" value="595" min="0"></div>
+        <div class="field"><label>Venue hire per day (if required)</label><input type="number" id="rVenue" value="2200" min="0"></div>
       </div>
       <div>
         <h3>Per-Learner Costs (ZAR each)</h3>
-        <div class="field"><label>Learner materials / workbook</label><input type="number" id="rMaterials" value="450"></div>
-        <div class="field"><label>PPE / practical consumables</label><input type="number" id="rPPE" value="650"></div>
-        <div class="field"><label>SETA/QCTO registration &amp; data-load admin</label><input type="number" id="rRegistration" value="350"></div>
-        <div class="field"><label>EISA registration fee (external exam)</label><input type="number" id="rEISA" value="1850"></div>
-        <div class="field"><label>Certification / Statement of Results issuing</label><input type="number" id="rCert" value="180"></div>
-        <div class="field"><label>Learner injury/liability insurance (WBL cover)</label><input type="number" id="rInsurance" value="120"></div>
+        <div class="field"><label>Learner materials / workbook</label><input type="number" id="rMaterials" value="450" min="0"></div>
+        <div class="field"><label>PPE / practical consumables</label><input type="number" id="rPPE" value="650" min="0"></div>
+        <div class="field"><label>SETA/QCTO registration &amp; data-load admin</label><input type="number" id="rRegistration" value="350" min="0"></div>
+        <div class="field"><label>EISA registration fee (external exam)</label><input type="number" id="rEISA" value="1850" min="0"></div>
+        <div class="field"><label>Certification / Statement of Results issuing</label><input type="number" id="rCert" value="180" min="0"></div>
+        <div class="field"><label>Learner injury/liability insurance (WBL cover)</label><input type="number" id="rInsurance" value="120" min="0"></div>
       </div>
       <div>
         <h3>Buffers, Overheads &amp; Margin</h3>
-        <div class="field"><label>Contingency / hidden-cost buffer (%)</label><input type="number" id="rContingency" value="8"></div>
-        <div class="field"><label>Cost-of-capital / cash-flow financing (%)</label><input type="number" id="rFinancing" value="2"></div>
-        <div class="field"><label>Compliance &amp; accreditation overhead (%)</label><input type="number" id="rCompliance" value="3"></div>
-        <div class="field"><label>Company overhead allocation (%)</label><input type="number" id="rOverhead" value="15"></div>
-        <div class="field"><label>Target gross margin (%)</label><input type="number" id="rTargetMargin" value="40"></div>
-        <div class="field"><label>Minimum acceptable margin floor (%)</label><input type="number" id="rMinMargin" value="20"></div>
-        <div class="field"><label>VAT rate (%)</label><input type="number" id="rVAT" value="15"></div>
+        <div class="field"><label>Contingency / hidden-cost buffer (%)</label><input type="number" id="rContingency" value="8" min="0" max="100"></div>
+        <div class="field"><label>Cost-of-capital / cash-flow financing (%)</label><input type="number" id="rFinancing" value="2" min="0" max="100"></div>
+        <div class="field"><label>Compliance &amp; accreditation overhead (%)</label><input type="number" id="rCompliance" value="3" min="0" max="100"></div>
+        <div class="field"><label>Company overhead allocation (%)</label><input type="number" id="rOverhead" value="15" min="0" max="100"></div>
+        <div class="field"><label>Target gross margin (%)</label><input type="number" id="rTargetMargin" value="40" min="0" max="95"></div>
+        <div class="field"><label>Minimum acceptable margin floor (%)</label><input type="number" id="rMinMargin" value="20" min="0" max="95"></div>
+        <div class="field"><label>VAT rate (%)</label><input type="number" id="rVAT" value="15" min="0" max="100"></div>
       </div>
     </div>
     <div class="btnrow">
@@ -322,16 +349,25 @@
 </div>
 
 <!-- ============ SAVED QUOTES TAB ============ -->
-<div class="tabpanel" id="tab-saved">
+<div class="tabpanel" id="tab-saved" role="tabpanel" aria-labelledby="tab-btn-saved">
   <div class="card">
     <h2>Saved Quotes</h2>
     <p class="sub">Quotes saved on this device/browser. Load a quote to review, duplicate or re-issue with an updated discount.</p>
+    <div class="row2" style="margin-bottom:16px;">
+      <div class="field" style="margin-bottom:0;"><input type="text" id="savedSearch" placeholder="Search by client or reference..."></div>
+      <div class="btnrow" style="margin-top:0;justify-content:flex-end;">
+        <button class="btn ghost" id="btnExportQuotes">Export All</button>
+        <button class="btn ghost" id="btnImportQuotes">Import</button>
+        <button class="btn danger" id="btnClearAll">Clear All</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
+      </div>
+    </div>
     <div id="savedListWrap"><div class="emptystate">No quotes saved yet — build a quote and click "Save Quote".</div></div>
   </div>
 </div>
 
 <!-- ============ HELP TAB ============ -->
-<div class="tabpanel" id="tab-help">
+<div class="tabpanel" id="tab-help" role="tabpanel" aria-labelledby="tab-btn-help">
   <div class="card">
     <h2>How the pricing logic works</h2>
     <p class="sub">A quick reference for any staff member using this tool for the first time</p>
@@ -350,6 +386,13 @@
 </div>
 
 </main>
+
+<footer style="background:var(--navy-dark);color:#8FA0C4;padding:18px 24px;font-size:11.5px;margin-top:auto;">
+  <div style="max-width:1300px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>Tiespro Costing Tool <span id="appVersion">v3.0</span> · TETA 06-157 · Internal staff use only</div>
+    <div id="onlineStatus" style="display:flex;align-items:center;gap:6px;"><span id="onlineDot" style="width:8px;height:8px;border-radius:50%;background:#1B7A43;"></span><span id="onlineText">Online</span></div>
+  </div>
+</footer>
 
 <!-- Printable client quote (hidden on screen) -->
 <div id="printArea">
@@ -374,12 +417,14 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 (function(){
 
-  // ---------- Storage helpers (persistent if available, in-memory fallback otherwise) ----------
+  // ---------- Storage helpers ----------
+  // Uses the native storage bridge if the page is hosted inside a wrapper app;
+  // otherwise falls back to an in-memory store.
   var memoryStore = {};
   var hasWindowStorage = typeof window.storage !== 'undefined' && window.storage;
 
@@ -409,14 +454,62 @@
   }
 
   // ---------- Tabs ----------
-  document.querySelectorAll('.tab-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
-      document.querySelectorAll('.tabpanel').forEach(function(p){p.classList.remove('active');});
-      btn.classList.add('active');
-      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-      if(btn.dataset.tab==='saved') renderSavedList();
+  var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+  function switchTab(targetTab){
+    var targetBtn = document.querySelector('.tab-btn[data-tab="'+targetTab+'"]');
+    if(!targetBtn) return;
+    tabBtns.forEach(function(b){
+      b.classList.remove('active');
+      b.setAttribute('aria-selected','false');
+      b.setAttribute('tabindex','-1');
     });
+    document.querySelectorAll('.tabpanel').forEach(function(p){p.classList.remove('active');});
+    targetBtn.classList.add('active');
+    targetBtn.setAttribute('aria-selected','true');
+    targetBtn.removeAttribute('tabindex');
+    document.getElementById('tab-'+targetTab).classList.add('active');
+    if(targetTab==='saved') renderSavedList();
+    targetBtn.focus();
+  }
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){ switchTab(btn.dataset.tab); });
+    btn.addEventListener('keydown', function(e){
+      var idx = tabBtns.indexOf(btn);
+      if(e.key==='ArrowRight' || e.key==='ArrowDown'){
+        e.preventDefault();
+        var next = tabBtns[(idx+1)%tabBtns.length];
+        switchTab(next.dataset.tab);
+      } else if(e.key==='ArrowLeft' || e.key==='ArrowUp'){
+        e.preventDefault();
+        var prev = tabBtns[(idx-1+tabBtns.length)%tabBtns.length];
+        switchTab(prev.dataset.tab);
+      } else if(e.key==='Home'){
+        e.preventDefault(); switchTab(tabBtns[0].dataset.tab);
+      } else if(e.key==='End'){
+        e.preventDefault(); switchTab(tabBtns[tabBtns.length-1].dataset.tab);
+      }
+    });
+  });
+
+  // ---------- Keyboard shortcuts ----------
+  document.addEventListener('keydown', function(e){
+    if(e.ctrlKey || e.metaKey){
+      if(e.key.toLowerCase()==='s'){
+        e.preventDefault();
+        document.getElementById('btnSave').click();
+      } else if(e.key.toLowerCase()==='p'){
+        e.preventDefault();
+        document.getElementById('btnGenerate').click();
+      } else if(e.key==='1'){
+        e.preventDefault(); switchTab('build');
+      } else if(e.key==='2'){
+        e.preventDefault(); switchTab('assumptions');
+      } else if(e.key==='3'){
+        e.preventDefault(); switchTab('saved');
+      } else if(e.key==='4'){
+        e.preventDefault(); switchTab('help');
+      }
+    }
   });
 
   function fmtR(n){
@@ -426,6 +519,48 @@
   function toast(msg){
     var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
     setTimeout(function(){t.classList.remove('show');},2200);
+  }
+
+  // Escape user-generated text before injecting it into innerHTML.
+  function escapeHtml(str){
+    if(str == null) return '';
+    return String(str).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+
+  // Clamp numeric inputs to their min/max attributes so manual entry can't break the model.
+  function clampNumberInput(el){
+    var val = parseFloat(el.value);
+    var min = el.min === '' ? null : parseFloat(el.min);
+    var max = el.max === '' ? null : parseFloat(el.max);
+    var fallback = (min !== null && !isNaN(min)) ? min : 0;
+    if(isNaN(val)){ el.value = fallback; }
+    else {
+      if(min !== null && !isNaN(min) && val < min) el.value = min;
+      if(max !== null && !isNaN(max) && val > max) el.value = max;
+    }
+  }
+
+  // Mark required fields as invalid when they are empty or below minimums.
+  function validateQuote(){
+    var checks = [
+      {id:'clientName', test:function(v){return v.trim().length>0;}},
+      {id:'quoteRef', test:function(v){return v.trim().length>0;}},
+      {id:'quoteDate', test:function(v){return v.length>0;}},
+      {id:'numLearners', test:function(v){return parseFloat(v)>=1;}},
+      {id:'travellers', test:function(v){return parseFloat(v)>=1;}}
+    ];
+    var valid = true;
+    checks.forEach(function(c){
+      var el = document.getElementById(c.id);
+      var err = document.getElementById('err-'+c.id);
+      var ok = c.test(el.value);
+      el.classList.toggle('invalid', !ok);
+      if(err) err.style.display = ok ? 'none' : 'block';
+      if(!ok) valid = false;
+    });
+    return valid;
   }
 
   // ---------- Discount slider (declared early: referenced by calcAll, which other setup below triggers immediately) ----------
@@ -512,6 +647,14 @@
   });
   ['eisaRequired','externalMod','ppeRequired','venueRequired'].forEach(function(id){
     document.getElementById(id).addEventListener('change', calcAll);
+  });
+
+  // Clamp numeric inputs on blur so negative or out-of-range values can't silently corrupt the quote.
+  document.querySelectorAll('input[type=number]').forEach(function(input){
+    input.addEventListener('change', function(){
+      clampNumberInput(input);
+      calcAll();
+    });
   });
 
   // ---------- Core calculation ----------
@@ -613,6 +756,7 @@
       trainingDays: trainingDays, assessmentDays: assessmentDays, moderationDays: moderationDays
     };
 
+    validateQuote();
     renderBreakdown();
   }
 
@@ -717,6 +861,7 @@
   async function renderSavedList(){
     var keys = await storeListKeys('quote:');
     var wrap = document.getElementById('savedListWrap');
+    var search = (document.getElementById('savedSearch').value || '').toLowerCase();
     if(!keys || keys.length===0){
       wrap.innerHTML = '<div class="emptystate">No quotes saved yet — build a quote and click "Save Quote".</div>';
       return;
@@ -728,20 +873,31 @@
     }
     records.sort(function(a,b){ return new Date(b.savedAt) - new Date(a.savedAt); });
 
+    if(search){
+      records = records.filter(function(r){
+        return (r.clientName||'').toLowerCase().indexOf(search)>-1 || (r.quoteRef||'').toLowerCase().indexOf(search)>-1;
+      });
+    }
+    if(records.length===0){
+      wrap.innerHTML = '<div class="emptystate">No quotes match your search.</div>';
+      return;
+    }
+
     var html = '<table class="savedlist"><tr><th>Quote Ref</th><th>Client</th><th>Date</th><th>Learners</th><th>Discount</th><th>Price</th><th>Margin</th><th></th></tr>';
     records.forEach(function(r){
       var marginPct = (r.marginAtDiscount*100);
       var pillClass = marginPct >= 20 ? 'green' : (marginPct>=0 ? 'amber':'red');
       html += '<tr>'+
-        '<td>'+r.quoteRef+'</td>'+
-        '<td>'+r.clientName+'</td>'+
-        '<td>'+r.quoteDate+'</td>'+
-        '<td>'+r.numLearners+'</td>'+
-        '<td>'+r.discountPct+'%</td>'+
+        '<td>'+escapeHtml(r.quoteRef)+'</td>'+
+        '<td>'+escapeHtml(r.clientName)+'</td>'+
+        '<td>'+escapeHtml(r.quoteDate)+'</td>'+
+        '<td>'+escapeHtml(r.numLearners)+'</td>'+
+        '<td>'+escapeHtml(r.discountPct)+'%</td>'+
         '<td>'+fmtR(r.finalPrice)+'</td>'+
         '<td><span class="pill '+pillClass+'">'+marginPct.toFixed(1)+'%</span></td>'+
-        '<td><button class="btn ghost" data-load="'+r.id+'" style="padding:5px 10px;font-size:11.5px;">Load</button> '+
-        '<button class="btn danger" data-del="'+r.id+'" style="padding:5px 10px;font-size:11.5px;">Delete</button></td>'+
+        '<td><button class="btn ghost" data-load="'+escapeHtml(r.id)+'" style="padding:5px 10px;font-size:11.5px;">Load</button> '+
+        '<button class="btn ghost" data-dup="'+escapeHtml(r.id)+'" style="padding:5px 10px;font-size:11.5px;">Dup</button> '+
+        '<button class="btn danger" data-del="'+escapeHtml(r.id)+'" style="padding:5px 10px;font-size:11.5px;">Del</button></td>'+
         '</tr>';
     });
     html += '</table>';
@@ -753,14 +909,38 @@
         if(val){ loadQuote(JSON.parse(val)); }
       });
     });
+    wrap.querySelectorAll('[data-dup]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var val = await storeGet(btn.dataset.dup);
+        if(!val) return;
+        var r = JSON.parse(val);
+        r.id = 'quote:'+Date.now();
+        r.quoteRef = r.quoteRef + '-COPY';
+        r.savedAt = new Date().toISOString();
+        await storeSet(r.id, JSON.stringify(r));
+        renderSavedList();
+        toast('Quote duplicated: '+r.quoteRef);
+      });
+    });
     wrap.querySelectorAll('[data-del]').forEach(function(btn){
       btn.addEventListener('click', async function(){
+        if(!confirm('Delete this saved quote?')) return;
         await storeDelete(btn.dataset.del);
         renderSavedList();
         toast('Quote deleted.');
       });
     });
   }
+
+  document.getElementById('savedSearch').addEventListener('input', renderSavedList);
+
+  document.getElementById('btnClearAll').addEventListener('click', async function(){
+    if(!confirm('Delete ALL saved quotes? This cannot be undone.')) return;
+    var keys = await storeListKeys('quote:');
+    for(var i=0;i<keys.length;i++){ await storeDelete(keys[i]); }
+    renderSavedList();
+    toast('All saved quotes cleared.');
+  });
 
   function loadQuote(r){
     document.getElementById('clientName').value = r.clientName;
@@ -786,9 +966,62 @@
     document.getElementById('personDaysAway').value = r.personDaysAway;
     discountSlider.value = r.discountPct;
     updateDeliveryUI();
+    saveDraft();
     document.querySelector('.tab-btn[data-tab="build"]').click();
     toast('Quote loaded: '+r.quoteRef);
   }
+
+  // ---------- Export / import saved quotes ----------
+  document.getElementById('btnExportQuotes').addEventListener('click', async function(){
+    var keys = await storeListKeys('quote:');
+    var records = [];
+    for(var i=0;i<keys.length;i++){
+      var val = await storeGet(keys[i]);
+      if(val){ try{ records.push(JSON.parse(val)); }catch(e){} }
+    }
+    if(records.length===0){ toast('No saved quotes to export.'); return; }
+    records.sort(function(a,b){ return new Date(b.savedAt) - new Date(a.savedAt); });
+    var blob = new Blob([JSON.stringify(records, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'tiespro-quotes-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Exported '+records.length+' quote(s).');
+  });
+
+  document.getElementById('btnImportQuotes').addEventListener('click', function(){
+    document.getElementById('importFile').click();
+  });
+
+  document.getElementById('importFile').addEventListener('change', async function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = async function(ev){
+      try{
+        var data = JSON.parse(ev.target.result);
+        if(!Array.isArray(data)) throw new Error('File must contain an array of quote records.');
+        var imported = 0, skipped = 0;
+        for(var i=0;i<data.length;i++){
+          var r = data[i];
+          if(!r || !r.id || r.id.indexOf('quote:')!==0){ skipped++; continue; }
+          // Re-serialize so any accidental extra fields are dropped and storage key is consistent.
+          await storeSet(r.id, JSON.stringify(r));
+          imported++;
+        }
+        toast('Imported '+imported+' quote(s). '+skipped+' skipped.');
+        renderSavedList();
+      }catch(err){
+        toast('Import failed: '+err.message);
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
 
   document.getElementById('btnReset').addEventListener('click', function(){
     if(confirm('Clear all fields on this quote?')){
@@ -813,13 +1046,17 @@
 
   // ---------- Generate client-facing printable quote ----------
   document.getElementById('btnGenerate').addEventListener('click', function(){
+    if(!validateQuote()){
+      toast('Please fix the highlighted fields before generating a quote.');
+      return;
+    }
     var c = lastCalc;
-    var clientName = document.getElementById('clientName').value || 'Prospective Client';
-    var qualText = document.getElementById('qualification').selectedOptions[0].text;
-    var nqf = document.getElementById('nqfLevel').value;
-    var ref = document.getElementById('quoteRef').value;
-    var date = document.getElementById('quoteDate').value;
-    var preparedBy = document.getElementById('preparedBy').value;
+    var clientName = escapeHtml(document.getElementById('clientName').value) || 'Prospective Client';
+    var qualText = escapeHtml(document.getElementById('qualification').selectedOptions[0].text);
+    var nqf = escapeHtml(document.getElementById('nqfLevel').value);
+    var ref = escapeHtml(document.getElementById('quoteRef').value);
+    var date = escapeHtml(document.getElementById('quoteDate').value);
+    var preparedBy = escapeHtml(document.getElementById('preparedBy').value);
 
     document.getElementById('pqMeta').innerHTML =
       'Quote Reference: <b>'+ref+'</b><br>Date: '+date+'<br>Prepared by: '+(preparedBy||'Tiespro Training Institute')+'<br>Valid for 30 days';
@@ -828,8 +1065,10 @@
       '<b>'+clientName+'</b><br>Programme: '+qualText+(nqf?(' — NQF Level '+nqf):'')+'<br>Number of learners: '+c.numLearners;
 
     var deliveryLabel = c.delivery==='centre' ? 'Tiespro Training Centre, Durban' : (c.delivery==='local' ? 'Client site (local delivery)' : 'Client site (delivery with overnight logistics)');
+    var durationMonths = document.getElementById('durationMonths').value || '12';
     document.getElementById('pqSummaryTable').innerHTML =
       '<tr><th>Item</th><th>Detail</th></tr>'+
+      '<tr><td>Programme duration</td><td>'+escapeHtml(durationMonths)+' month'+(durationMonths==='1'?'':'s')+'</td></tr>'+
       '<tr><td>Training days</td><td>'+c.trainingDays+'</td></tr>'+
       '<tr><td>Assessment days</td><td>'+c.assessmentDays+'</td></tr>'+
       '<tr><td>Delivery location</td><td>'+deliveryLabel+'</td></tr>'+
@@ -857,8 +1096,87 @@
     window.print();
   });
 
+  // ---------- Unsaved-changes warning ----------
+  var isDirty = false;
+  function setDirty(){ isDirty = true; }
+  function clearDirty(){ isDirty = false; }
+  document.getElementById('tab-build').addEventListener('input', setDirty);
+  document.getElementById('tab-build').addEventListener('change', setDirty);
+  document.getElementById('btnSave').addEventListener('click', clearDirty);
+  window.addEventListener('beforeunload', function(e){
+    if(!isDirty) return;
+    e.preventDefault();
+    e.returnValue = 'You have unsaved changes to this quote.';
+    return e.returnValue;
+  });
+
+  // ---------- Auto-save draft ----------
+  var DRAFT_KEYS = ['clientName','quoteRef','preparedBy','quoteDate','qualification','nqfLevel','numLearners','trainingDays','assessmentDays','moderationDays','durationMonths','distanceKm','numTrips','travellers','nights','personDaysAway','discountPct'];
+  var DRAFT_CHECKBOXES = ['eisaRequired','externalMod','ppeRequired','venueRequired'];
+  function saveDraft(){
+    var draft = {};
+    DRAFT_KEYS.forEach(function(id){ draft[id]=document.getElementById(id).value; });
+    DRAFT_CHECKBOXES.forEach(function(id){ draft[id]=document.getElementById(id).checked; });
+    draft.delivery = document.querySelector('input[name="delivery"]:checked').value;
+    draft.savedAt = new Date().toISOString();
+    storeSet('draft', JSON.stringify(draft));
+  }
+  async function loadDraft(){
+    var raw = await storeGet('draft');
+    if(!raw) return;
+    try{
+      var draft = JSON.parse(raw);
+      DRAFT_KEYS.forEach(function(id){ if(draft[id]!==undefined) document.getElementById(id).value = draft[id]; });
+      DRAFT_CHECKBOXES.forEach(function(id){ if(draft[id]!==undefined) document.getElementById(id).checked = draft[id]; });
+      if(draft.delivery) document.querySelector('input[name="delivery"][value="'+draft.delivery+'"]').checked = true;
+      updateDeliveryUI();
+    }catch(e){}
+  }
+  document.getElementById('tab-build').addEventListener('input', function(){ saveDraft(); });
+  document.getElementById('tab-build').addEventListener('change', function(){ saveDraft(); });
+
   // ---------- Init ----------
   loadAssumptions();
+  loadDraft();
+
+  // Deep-link to a tab via URL hash (e.g. tool.html#saved from a PWA shortcut)
+  var hashTab = window.location.hash.replace('#','');
+  if(['build','assumptions','saved','help'].indexOf(hashTab)>-1){
+    switchTab(hashTab);
+  }
+
+  // ---------- PWA: install prompt ----------
+  var deferredInstallPrompt = null;
+  var btnInstall = document.getElementById('btnInstall');
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    btnInstall.style.display = 'inline-block';
+  });
+  btnInstall.addEventListener('click', async function(){
+    if(!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    btnInstall.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', function(){
+    btnInstall.style.display = 'none';
+    toast('Tiespro Costing Tool installed.');
+  });
+
+  // ---------- PWA: service worker (offline support) ----------
+  
+
+  // ---------- Online / offline indicator ----------
+  function updateOnlineStatus(){
+    var online = navigator.onLine;
+    document.getElementById('onlineDot').style.background = online ? '#1B7A43' : '#B4232C';
+    document.getElementById('onlineText').textContent = online ? 'Online' : 'Offline';
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
 })();
 </script>
 </body>

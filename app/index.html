@@ -6,9 +6,23 @@
 <title>Tiespro Training Institute</title>
 <meta name="description" content="Tiespro Training Institute — TETA-accredited training, repositioned as a tax-efficient youth employment strategy for transport, logistics and supply chain employers.">
 <meta name="theme-color" content="#1F3864">
+<link rel="canonical" href="https://tiesproproject.vercel.app/">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:title" content="Tiespro Training Institute">
+<meta property="og:description" content="TETA-accredited training repositioned as a tax-efficient youth employment strategy for transport, logistics and supply chain employers.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tiesproproject.vercel.app/">
+<meta property="og:image" content="https://tiesproproject.vercel.app/icons/icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="Tiespro Training Institute logo">
+<meta property="og:locale" content="en_ZA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tiespro Training Institute">
+<meta name="twitter:description" content="TETA-accredited training repositioned as a tax-efficient youth employment strategy for transport, logistics and supply chain employers.">
+<meta name="twitter:image" content="https://tiesproproject.vercel.app/icons/icon-512.png">
 <style>
   :root{
     --navy:#1F3864; --navy-dark:#12213D; --navy-light:#2E4A7D;
@@ -98,9 +112,13 @@
   @media (prefers-reduced-motion: reduce){
     .mark,.wordmark,.tagline,.lede,.cta,.foot{animation:none;opacity:1;}
   }
+  .skip-link{position:absolute;top:-40px;left:0;background:var(--navy-dark);color:#fff;padding:8px 14px;z-index:1000;font-size:13px;font-weight:700;text-decoration:none;border-radius:0 0 8px 0;}
+  .skip-link:focus{top:0;}
+  *:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#cta">Skip to content</a>
 
   <div class="mark">
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -114,7 +132,7 @@
 
   <p class="lede">Turn a compulsory training spend into a funded, tax-efficient pipeline of <b>qualified, tenure-ready staff</b> — and let SETA funding be the bonus, not the plan.</p>
 
-  <a class="cta" href="home.html">
+  <a class="cta" href="home.html" id="cta">
     Enter Site
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
   </a>

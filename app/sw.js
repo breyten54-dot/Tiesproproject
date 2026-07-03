@@ -1,11 +1,13 @@
 // Bump this on every deploy so returning staff pick up the new version
 // instead of a stale cached copy.
-const CACHE_NAME = 'tiespro-site-v2';
+const CACHE_NAME = 'tiespro-site-v5';
 const ASSETS = [
   './',
   './index.html',
   './home.html',
   './tool.html',
+  './tool.js',
+  './404.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -30,14 +32,18 @@ self.addEventListener('activate', (event) => {
 });
 
 // Cache-first for the app shell, so the tool opens instantly and works offline.
-// Falls back to network for anything not pre-cached, then to the cached
-// index.html if the network is unavailable (offline navigation).
+// Falls back to network for anything not pre-cached; if that also fails while
+// offline, navigations (typing/following a link to a page) get the branded
+// 404 page, and other requests (e.g. fetch/XHR) simply fail through.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
-      return fetch(event.request).catch(() => caches.match('./index.html'));
+      return fetch(event.request).catch(() => {
+        if (event.request.mode === 'navigate') return caches.match('./404.html');
+        return Response.error();
+      });
     })
   );
 });

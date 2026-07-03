@@ -1,3 +1,7 @@
 Thumbs.db
 .DS_Store
 node_modules/
+
+# One-off delivery package already merged into app/ - kept locally for reference only
+Tiespro_Full_Delivery.zip
+Tiespro_Full_Delivery/

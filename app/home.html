@@ -6,9 +6,42 @@
 <title>Tiespro Training Institute — Training as a Tax-Reduction &amp; Youth Employment Strategy</title>
 <meta name="description" content="TETA-accredited training for transport, logistics and supply chain employers — Section 12H, the Employment Tax Incentive and B-BBEE scorecard credit, stacked on one learner pipeline.">
 <meta name="theme-color" content="#1F3864">
+<link rel="canonical" href="https://tiesproproject.vercel.app/home.html">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:title" content="Tiespro Training Institute — Tax-efficient training for transport &amp; logistics">
+<meta property="og:description" content="Turn a compulsory training spend into a funded, tax-efficient pipeline of qualified, tenure-ready staff. TETA accredited.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tiesproproject.vercel.app/home.html">
+<meta property="og:image" content="https://tiesproproject.vercel.app/icons/icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="Tiespro Training Institute logo">
+<meta property="og:locale" content="en_ZA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tiespro Training Institute — Tax-efficient training for transport &amp; logistics">
+<meta name="twitter:description" content="Turn a compulsory training spend into a funded, tax-efficient pipeline of qualified, tenure-ready staff. TETA accredited.">
+<meta name="twitter:image" content="https://tiesproproject.vercel.app/icons/icon-512.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Tiespro Training Institute",
+  "alternateName": "Tiespro",
+  "url": "https://tiesproproject.vercel.app",
+  "logo": "https://tiesproproject.vercel.app/icons/icon-512.png",
+  "description": "TETA-accredited training for transport, logistics and supply chain employers, structured as a tax-efficient youth employment strategy.",
+  "foundingDate": "2005",
+  "areaServed": "ZA",
+  "sameAs": [],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "sales",
+    "email": "berkeley@praeto.co.za"
+  }
+}
+</script>
 <style>
   :root{
     --navy:#1F3864; --navy-dark:#152647; --navy-light:#2E4A7D;
@@ -33,10 +66,17 @@
   .navlinks a{text-decoration:none;color:#C7D1E6;}
   .navlinks a:hover{color:#fff;}
   .navlinks a.staff{color:var(--gold);}
-  .navburger{display:none;}
+  .navburger{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:6px;}
+  .navburger svg{width:26px;height:26px;}
+  .skip-link{position:absolute;top:-40px;left:0;background:var(--navy-dark);color:#fff;padding:8px 14px;z-index:1000;font-size:13px;font-weight:700;text-decoration:none;border-radius:0 0 8px 0;}
+  .skip-link:focus{top:0;}
+  *:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
   @media (max-width:760px){
-    .navlinks a:not(.staff){display:none;}
-    .navlinks{gap:0;}
+    .navlinks{position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:flex-start;background:var(--navy-dark);padding:14px 24px;gap:0;border-top:1px solid rgba(255,255,255,.08);display:none;}
+    .navlinks.open{display:flex;}
+    .navlinks a{display:block;padding:10px 0;width:100%;border-bottom:1px solid rgba(255,255,255,.06);}
+    .navlinks a:last-child{border-bottom:none;}
+    .navburger{display:block;}
   }
 
   /* ---- Hero ---- */
@@ -108,14 +148,18 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 
-<nav class="site">
+<nav class="site" aria-label="Primary">
   <div class="wrap">
     <a class="brand" href="index.html">
       <span class="mark"><svg viewBox="0 0 100 100" fill="none"><rect x="18" y="24" width="64" height="16" fill="#1F3864"/><rect x="42" y="40" width="16" height="38" fill="#1F3864"/></svg></span>
       <span class="word">TIESPRO</span>
     </a>
-    <div class="navlinks">
+    <button class="navburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="navMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="navlinks" id="navMenu">
       <a href="#reframe">Why Tiespro</a>
       <a href="#numbers">The Numbers</a>
       <a href="#qualifications">Programmes</a>
@@ -125,6 +169,7 @@
   </div>
 </nav>
 
+<main id="main">
 <header class="hero">
   <div class="wrap">
     <div class="eyebrow">TETA Accreditation 06-157 &nbsp;·&nbsp; A Praeto Group Holdings Entity</div>
@@ -241,6 +286,8 @@
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="legal">
@@ -252,6 +299,23 @@
 </footer>
 
 <script>
+  (function(){
+    var burger = document.querySelector('.navburger');
+    var menu = document.getElementById('navMenu');
+    if(burger && menu){
+      burger.addEventListener('click', function(){
+        var open = menu.classList.toggle('open');
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      menu.querySelectorAll('a').forEach(function(a){
+        a.addEventListener('click', function(){
+          menu.classList.remove('open');
+          burger.setAttribute('aria-expanded', 'false');
+        });
+      });
+    }
+  })();
+
   if('serviceWorker' in navigator){
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('sw.js').catch(function(){});

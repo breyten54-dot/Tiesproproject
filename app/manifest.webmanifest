@@ -12,5 +12,14 @@
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
+  ],
+  "screenshots": [
+    { "src": "screenshots/tool-wide.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "Tiespro Costing Tool - desktop" },
+    { "src": "screenshots/tool-narrow.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Tiespro Costing Tool - mobile" }
+  ],
+  "shortcuts": [
+    { "name": "Build Quote", "short_name": "Quote", "description": "Start a new client quotation", "url": "./tool.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Saved Quotes", "short_name": "Saved", "description": "View saved quotations", "url": "./tool.html#saved", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "categories": ["business", "finance", "productivity"]
 }
