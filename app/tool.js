@@ -195,6 +195,7 @@
 
   document.getElementById('btnSwitchUser').addEventListener('click', async function(){
     currentUser = null;
+    currentApproval = {status:'none', by:'', date:'', comment:'', snapshot:null};
     await storeDelete('session');
     document.getElementById('whoamiBox').style.display='none';
     document.getElementById('preparedBy').value='';
@@ -202,6 +203,7 @@
     document.getElementById('loginPane').style.display='block';
     document.getElementById('setupPane').style.display='none';
     populateLoginNames();
+    renderApprovalPanel();
   });
 
   // ---------- Staff & Access tab rendering (manager only) ----------
@@ -256,7 +258,7 @@
   // select's initial change-dispatch below runs calcAll() -> renderBreakdown()
   // -> renderApprovalPanel() synchronously during script load, and that chain
   // reads currentApproval.
-  var currentApproval = {status:'none', by:'', date:'', comment:''};
+  var currentApproval = {status:'none', by:'', date:'', comment:'', snapshot:null};
 
   var QUALS = {
     cfa:   {name:'Clearing and Forwarding Agent', nqf:5, saqa:'96368',  credits:120, verified:true,
@@ -716,17 +718,43 @@
   // renderBreakdown() -> renderApprovalPanel() synchronously at script load,
   // before this point in the file would otherwise have run.)
 
+  function getApprovalSnapshot(){
+    return {
+      discountPct: discountSlider.value,
+      finalPrice: lastCalc.finalPrice,
+      numLearners: document.getElementById('numLearners').value,
+      trainingDays: document.getElementById('trainingDays').value,
+      assessmentDays: document.getElementById('assessmentDays').value,
+      moderationDays: document.getElementById('moderationDays').value,
+      revisionDays: document.getElementById('revisionDays').value,
+      delivery: document.querySelector('input[name="delivery"]:checked').value,
+      eisaRequired: document.getElementById('eisaRequired').checked,
+      externalMod: document.getElementById('externalMod').checked,
+      qualification: qualSel.value
+    };
+  }
+  function isApprovalStale(snapshot){
+    if(!snapshot) return true;
+    var current = getApprovalSnapshot();
+    var keys = Object.keys(current);
+    for(var i=0;i<keys.length;i++){
+      var k = keys[i];
+      if(String(current[k]) !== String(snapshot[k])) return true;
+    }
+    return false;
+  }
+
   async function refreshCurrentApproval(){
     var ref = qRef.value.trim();
-    if(!ref){ currentApproval = {status:'none', by:'', date:'', comment:''}; renderApprovalPanel(); return; }
+    if(!ref){ currentApproval = {status:'none', by:'', date:'', comment:'', snapshot:null}; renderApprovalPanel(); return; }
     var val = await storeGet('quote:'+ref);
     if(val){
       try{
         var r = JSON.parse(val);
-        currentApproval = {status:r.approvalStatus||'none', by:r.approvedBy||'', date:r.approvalDate||'', comment:r.approvalComment||''};
-      }catch(e){ currentApproval = {status:'none', by:'', date:'', comment:''}; }
+        currentApproval = {status:r.approvalStatus||'none', by:r.approvedBy||'', date:r.approvalDate||'', comment:r.approvalComment||'', snapshot:r.approvalSnapshot||null};
+      }catch(e){ currentApproval = {status:'none', by:'', date:'', comment:'', snapshot:null}; }
     } else {
-      currentApproval = {status:'none', by:'', date:'', comment:''};
+      currentApproval = {status:'none', by:'', date:'', comment:'', snapshot:null};
     }
     renderApprovalPanel();
   }
@@ -742,6 +770,20 @@
       return;
     }
     if(currentApproval.status === 'approved'){
+      var stale = isApprovalStale(currentApproval.snapshot);
+      if(stale){
+        panel.innerHTML = '<div class="approvalbox pending"><b>Approval is stale</b> — this quote has been changed since it was approved by '+escapeHtml(currentApproval.by)+' on '+escapeHtml(currentApproval.date)+'. Submit for re-approval before generating.</div>'+
+          '<div class="btnrow"><button class="btn ghost" id="btnResubmitApproval" type="button">Re-submit for Approval</button></div>';
+        genBtn.disabled = true; genBtn.title='Quote changed since approval — re-submit for approval.';
+        var resubmitBtn = document.getElementById('btnResubmitApproval');
+        if(resubmitBtn) resubmitBtn.addEventListener('click', async function(){
+          var r = await saveCurrentQuote({approvalStatus:'pending'});
+          if(!r) return;
+          await refreshCurrentApproval();
+          toast('Re-submitted for manager approval.');
+        });
+        return;
+      }
       panel.innerHTML = '<div class="approvalbox approved"><b>Approved</b> by '+escapeHtml(currentApproval.by)+' on '+escapeHtml(currentApproval.date)+'. '+(currentApproval.comment?('Comment: '+escapeHtml(currentApproval.comment)):'')+'</div>';
       genBtn.disabled = false; genBtn.title='';
       return;
@@ -860,10 +902,12 @@
         record.approvedBy = existing.approvedBy || '';
         record.approvalDate = existing.approvalDate || '';
         record.approvalComment = existing.approvalComment || '';
+        record.approvalSnapshot = existing.approvalSnapshot || null;
       }
     }
     if(overrides) Object.assign(record, overrides);
     if(overrides && overrides.approvalStatus){
+      record.approvalSnapshot = overrides.approvalStatus === 'approved' ? getApprovalSnapshot() : null;
       record.activityLog.push({date:new Date().toISOString(), user:(currentUser?currentUser.name:'Unknown'), note:'Approval status set to '+overrides.approvalStatus+(overrides.approvalComment?(' — '+overrides.approvalComment):'')});
     }
     await storeSet(key, JSON.stringify(record));
