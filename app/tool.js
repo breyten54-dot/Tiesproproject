@@ -103,7 +103,11 @@
         }
         if(el.classList.contains('tab-btn') && el.classList.contains('active')){
           el.classList.remove('active');
-          document.querySelector('.tab-btn[data-tab="build"]').classList.add('active');
+          el.setAttribute('aria-selected','false');
+          var buildBtn = document.querySelector('.tab-btn[data-tab="build"]');
+          buildBtn.classList.add('active');
+          buildBtn.setAttribute('aria-selected','true');
+          buildBtn.removeAttribute('tabindex');
         }
       }
     });
@@ -208,7 +212,7 @@
       html += '<tr>'+
         '<td>'+escapeHtml(s.name)+'</td>'+
         '<td><span class="pill '+(s.role==='manager'?'green':'grey')+'">'+(s.role==='manager'?'Manager':'Staff')+'</span></td>'+
-        '<td>'+escapeHtml(s.pin)+'</td>'+
+        '<td>••••</td>'+
         '<td><button class="btn danger" data-remove-staff="'+escapeHtml(s.id)+'" style="padding:5px 10px;font-size:11.5px;">Remove</button></td>'+
         '</tr>';
     });
@@ -216,6 +220,12 @@
     wrap.querySelectorAll('[data-remove-staff]').forEach(function(btn){
       btn.addEventListener('click', async function(){
         if(staffDirectory.length<=1){ toast('At least one staff member must remain.'); return; }
+        var target = staffDirectory.find(function(s){ return s.id === btn.dataset.removeStaff; });
+        var managersLeft = staffDirectory.filter(function(s){ return s.role==='manager' && s.id !== btn.dataset.removeStaff; }).length;
+        if(target && target.role==='manager' && managersLeft===0){
+          toast('Cannot remove the only Manager — promote another staff member first.');
+          return;
+        }
         if(!confirm('Remove this staff member? They will no longer be able to sign in.')) return;
         staffDirectory = staffDirectory.filter(function(s){ return s.id !== btn.dataset.removeStaff; });
         await saveStaff();

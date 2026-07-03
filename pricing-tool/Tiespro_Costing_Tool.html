@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tiespro Training Institute — Costing &amp; Quotation Tool</title>
 <meta name="description" content="Internal costing and quotation tool for Tiespro Training Institute — build client-ready training quotes with locality, facilitator, assessment and EISA costs built in.">
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#1F3864">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -25,13 +26,13 @@
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh;}
-  header.app-header{background:var(--navy);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  header.app-header{background:var(--navy);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;flex-shrink:0;}
   header.app-header .brand{display:flex;flex-direction:column;}
   header.app-header .brand .name{font-size:20px;font-weight:800;letter-spacing:.3px;}
   header.app-header .brand .tag{font-size:12px;color:var(--gold);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
   header.app-header .meta{font-size:11.5px;color:#C7D1E6;text-align:right;}
 
-  nav.tabs{display:flex;background:var(--navy-dark);padding:0 20px;overflow-x:auto;}
+  nav.tabs{display:flex;background:var(--navy-dark);padding:0 20px;overflow-x:auto;flex-shrink:0;}
   nav.tabs button{background:none;border:none;color:#B9C4DE;padding:14px 18px;font-size:13.5px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;letter-spacing:.2px;}
   nav.tabs button.active{color:#fff;border-bottom:3px solid var(--gold);}
   nav.tabs button:hover{color:#fff;}
@@ -114,6 +115,8 @@
 
   .note{background:#F0F4FA;border-radius:8px;padding:12px 14px;font-size:12px;color:#3A4150;margin-bottom:16px;line-height:1.5;}
   .note b{color:var(--navy);}
+  .note.warn{background:var(--amber-bg);color:#7A4E00;}
+  .note.warn b{color:#7A4E00;}
 
   table.savedlist{width:100%;border-collapse:collapse;font-size:13px;}
   table.savedlist th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding:8px 6px;}
@@ -147,8 +150,47 @@
   table.pq-table tr.total td{font-weight:800;border-top:2px solid var(--navy);font-size:14px;}
   .pq-terms{font-size:11px;color:var(--muted);line-height:1.6;margin-top:20px;border-top:1px solid var(--line);padding-top:12px;}
 
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .25s;z-index:999;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .25s;z-index:999;max-width:80vw;text-align:center;}
   .toast.show{opacity:1;}
+
+  /* Roles: manager-only tabs/panels are hidden entirely for Staff accounts */
+  .tab-btn.hidden-role{display:none;}
+  .tabpanel.hidden-role{display:none !important;}
+
+  header.app-header .whoami{font-size:12px;color:#fff;text-align:right;background:rgba(255,255,255,.08);padding:6px 12px;border-radius:20px;}
+  header.app-header .whoami b{color:var(--gold);}
+  header.app-header .whoami button{background:none;border:none;color:#C7D1E6;text-decoration:underline;cursor:pointer;margin-left:8px;font:inherit;padding:0;}
+
+  /* Sign-in / first-run setup overlay */
+  #loginOverlay{position:fixed;inset:0;background:linear-gradient(160deg,var(--navy) 0%, var(--navy-dark) 100%);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+  .logincard{background:#fff;border-radius:14px;padding:34px 32px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  .logincard h1{font-size:18px;color:var(--navy);margin:0 0 4px;}
+  .logincard .sub{font-size:12.5px;color:var(--muted);margin:0 0 22px;line-height:1.5;}
+  .logincard .field{margin-bottom:14px;}
+  .logincard .err{color:var(--red);font-size:12px;font-weight:700;margin-top:-6px;margin-bottom:12px;display:none;}
+  .logincard .foot{font-size:10.5px;color:var(--muted);margin-top:16px;line-height:1.5;}
+
+  table.stafflist{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;}
+  table.stafflist th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding:8px 6px;}
+  table.stafflist td{padding:9px 6px;border-bottom:1px solid #EEF0F3;}
+
+  .approvalbox{border-radius:8px;padding:12px 14px;margin-top:10px;font-size:12.5px;line-height:1.6;}
+  .approvalbox.pending{background:var(--amber-bg);color:#7A4E00;}
+  .approvalbox.approved{background:var(--green-bg);color:var(--green);}
+  .approvalbox.rejected{background:var(--red-bg);color:var(--red);}
+  .approvalbox textarea{width:100%;border:1px solid #CBD2DD;border-radius:6px;padding:8px;font-family:inherit;font-size:12.5px;margin-top:8px;resize:vertical;min-height:50px;}
+  button.btn.approve{background:var(--green);color:#fff;}
+  button.btn:disabled{opacity:.5;cursor:not-allowed;}
+  table.costtable tr.addoncat td{font-weight:700;color:#8A5A00;padding-top:12px;}
+
+  .statrow{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+  .statchip{background:#F0F4FA;border-radius:8px;padding:10px 16px;text-align:center;min-width:110px;}
+  .statchip .n{font-size:20px;font-weight:800;color:var(--navy);}
+  .statchip .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+  .statchip.warn .n{color:var(--red);}
+  table.savedlist tr.overdue{background:var(--red-bg);}
+  table.savedlist select, table.savedlist input[type=date]{font-size:12px;padding:4px 6px;border-radius:5px;border:1px solid #CBD2DD;font-family:inherit;}
+  .pill.grey{background:#EEF0F3;color:var(--muted);}
 
   /* Accessibility */
   .skip-link{position:absolute;top:-40px;left:0;background:var(--navy);color:#fff;padding:8px 14px;z-index:1000;font-size:13px;font-weight:700;text-decoration:none;border-radius:0 0 8px 0;}
@@ -160,6 +202,30 @@
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>
 
+<!-- ============ SIGN-IN / FIRST-RUN SETUP OVERLAY ============ -->
+<div id="loginOverlay" style="display:none;">
+  <div class="logincard">
+    <div id="loginPane">
+      <h1>Sign in to Tiespro Costing Tool</h1>
+      <p class="sub">Your name is used to auto-fill "Prepared By" on every quote and to set what you can access.</p>
+      <div class="field"><label>Your Name</label><select id="loginName"></select></div>
+      <div class="field"><label>PIN</label><input type="password" id="loginPin" inputmode="numeric" maxlength="6" placeholder="4-6 digit PIN"></div>
+      <div class="err" id="loginErr">Incorrect PIN — please try again.</div>
+      <button class="btn primary" id="btnLogin" style="width:100%;">Sign In</button>
+      <div class="foot">This sign-in identifies staff for quote records and manager approvals. It runs entirely in your browser (no server), so it is a convenience layer for a trusted internal team — not a security boundary for sensitive data.</div>
+    </div>
+    <div id="setupPane" style="display:none;">
+      <h1>Set up the first account</h1>
+      <p class="sub">No staff are configured on this device yet. Create the first account — it's set up as a Manager so it can access Rate Assumptions and approve quotes. Add the rest of the team from Staff &amp; Access afterwards.</p>
+      <div class="field"><label>Your Name</label><input type="text" id="setupName" placeholder="e.g. Berkeley Pretorius"></div>
+      <div class="field"><label>Choose a PIN (4–6 digits)</label><input type="password" id="setupPin" inputmode="numeric" maxlength="6" placeholder="e.g. 4821"></div>
+      <div class="err" id="setupErr">Enter a name and a 4–6 digit PIN.</div>
+      <button class="btn primary" id="btnSetup" style="width:100%;">Create Manager Account</button>
+      <div class="foot">This sign-in identifies staff for quote records and manager approvals. It runs entirely in your browser (no server), so it is a convenience layer for a trusted internal team — not a security boundary for sensitive data.</div>
+    </div>
+  </div>
+</div>
+
 <header class="app-header">
   <div class="brand">
     <a href="../app/home.html" style="color:#fff;text-decoration:none;font-size:11px;font-weight:700;color:#9FB0CE;letter-spacing:.3px;">&larr; Tiespro Home</a>
@@ -168,14 +234,16 @@
   </div>
   <div style="display:flex;align-items:center;gap:14px;">
     <button id="btnInstall" class="btn gold" style="display:none;padding:8px 14px;font-size:12.5px;">Install App</button>
+    <div class="whoami" id="whoamiBox" style="display:none;">Signed in as <b id="whoamiName"></b> <span id="whoamiRole"></span><button type="button" id="btnSwitchUser">Switch User</button></div>
     <div class="meta">TETA Accreditation 06-157 &nbsp;|&nbsp; Praeto Group Holdings<br>For internal staff use — generates client-ready quotations</div>
   </div>
 </header>
 
 <nav class="tabs" aria-label="Quote sections" role="tablist">
   <button class="tab-btn active" data-tab="build" role="tab" aria-selected="true" id="tab-btn-build" aria-controls="tab-build">Build Quote</button>
-  <button class="tab-btn" data-tab="assumptions" role="tab" aria-selected="false" id="tab-btn-assumptions" aria-controls="tab-assumptions">Rate Assumptions</button>
-  <button class="tab-btn" data-tab="saved" role="tab" aria-selected="false" id="tab-btn-saved" aria-controls="tab-saved">Saved Quotes</button>
+  <button class="tab-btn" data-tab="saved" role="tab" aria-selected="false" id="tab-btn-saved" aria-controls="tab-saved">Quote Tracker</button>
+  <button class="tab-btn role-manager hidden-role" data-tab="assumptions" role="tab" aria-selected="false" id="tab-btn-assumptions" aria-controls="tab-assumptions">Rate Assumptions</button>
+  <button class="tab-btn role-manager hidden-role" data-tab="access" role="tab" aria-selected="false" id="tab-btn-access" aria-controls="tab-access">Staff &amp; Access</button>
   <button class="tab-btn" data-tab="help" role="tab" aria-selected="false" id="tab-btn-help" aria-controls="tab-help">How This Works</button>
 </nav>
 
@@ -194,7 +262,7 @@
           <div class="field"><label>Quote Reference</label><input type="text" id="quoteRef" aria-required="true"><span class="error-msg" id="err-quoteRef">Enter a quote reference</span></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Prepared By</label><input type="text" id="preparedBy" placeholder="Staff member name"></div>
+          <div class="field"><label>Prepared By</label><input type="text" id="preparedBy" placeholder="Sign in to auto-fill" readonly></div>
           <div class="field"><label>Quote Date</label><input type="date" id="quoteDate" aria-required="true"><span class="error-msg" id="err-quoteDate">Select a quote date</span></div>
         </div>
 
@@ -203,19 +271,20 @@
           <div class="field">
             <label>Qualification / Programme</label>
             <select id="qualification">
-              <option value="Clearing and Forwarding Agent|5|40">Clearing and Forwarding Agent (NQF 5)</option>
-              <option value="Supply Chain Practitioner|5|40">Supply Chain Practitioner (NQF 5)</option>
-              <option value="Transport Clerk|4|30">Transport Clerk (NQF 4)</option>
-              <option value="Freight Handler|3|20">Freight Handler (NQF 3)</option>
-              <option value="Truck Driver|3|20">Truck Driver (NQF 3)</option>
-              <option value="Bus Driver|3|20">Bus Driver (NQF 3)</option>
-              <option value="Taxi Driver|3|20">Taxi Driver (NQF 3)</option>
-              <option value="Custom|0|10">Other / Custom Programme</option>
+              <option value="cfa">Clearing and Forwarding Agent (NQF 5)</option>
+              <option value="scp">Supply Chain Practitioner (NQF 5)</option>
+              <option value="tc">Transport Clerk (NQF 4)</option>
+              <option value="fh">Freight Handler (NQF 3)</option>
+              <option value="td">Truck Driver (NQF 3)</option>
+              <option value="bd">Bus Driver (NQF 3)</option>
+              <option value="txd">Taxi Driver (NQF 3)</option>
+              <option value="custom">Other / Custom Programme</option>
             </select>
-            <span class="hint">Selecting a qualification pre-fills typical NQF level &amp; training days — edit freely below</span>
+            <span class="hint">Selecting a qualification pre-fills days sourced from its registered SAQA credit value — edit freely below</span>
           </div>
           <div class="field"><label>NQF Level</label><input type="text" id="nqfLevel"></div>
         </div>
+        <div class="note" id="qualRefNote" style="margin-bottom:14px;"></div>
         <div class="row3">
           <div class="field"><label>Number of Learners</label><input type="number" id="numLearners" value="20" min="1" aria-required="true"><span class="error-msg" id="err-numLearners">At least 1 learner required</span></div>
           <div class="field"><label>Training Days</label><input type="number" id="trainingDays" value="20" min="0"></div>
@@ -224,6 +293,10 @@
         <div class="row2">
           <div class="field"><label>Internal Moderation Days</label><input type="number" id="moderationDays" value="2" min="0"></div>
           <div class="field"><label>Contract / Programme Duration (months)</label><input type="number" id="durationMonths" value="12" min="1"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Revision Days <span style="color:#8A5A00;font-weight:800;">(additional — not part of standard programme)</span></label><input type="number" id="revisionDays" value="0" min="0">
+            <span class="hint">Extra facilitator days for pre-EISA revision/exam prep. Billed as a separate, non-discounted line.</span></div>
         </div>
         <div class="checkline"><input type="checkbox" id="eisaRequired" checked><label for="eisaRequired" style="margin:0;">EISA (external exam) required for this qualification</label></div>
         <div class="checkline"><input type="checkbox" id="externalMod"><label for="externalMod" style="margin:0;">External moderation required (SETA/AQP-appointed)</label></div>
@@ -278,7 +351,7 @@
         <div class="discountbox">
           <div class="drow"><span style="font-weight:700;font-size:13px;">Discount to Client</span><span class="val" id="discountVal">0%</span></div>
           <input type="range" id="discountSlider" min="0" max="25" step="1" value="0">
-          <div class="drow" style="margin-top:10px;margin-bottom:0;"><span style="font-size:11.5px;color:var(--muted);">Maximum allowed: 25%</span><span style="font-size:11.5px;color:var(--muted);" id="marginAtDiscount"></span></div>
+          <div class="drow" style="margin-top:10px;margin-bottom:0;"><span style="font-size:11.5px;color:var(--muted);">Maximum allowed: 25% · applies to standard programme only</span><span style="font-size:11.5px;color:var(--muted);" id="marginAtDiscount"></span></div>
         </div>
 
         <div class="pricebig">
@@ -287,6 +360,7 @@
           <div class="perlearner" id="perLearnerPrice"></div>
         </div>
         <div id="marginIndicator"></div>
+        <div id="approvalPanel"></div>
 
         <div class="btnrow">
           <button class="btn primary" id="btnGenerate">Generate Client Quote</button>
@@ -298,8 +372,8 @@
   </div>
 </div>
 
-<!-- ============ ASSUMPTIONS TAB ============ -->
-<div class="tabpanel" id="tab-assumptions" role="tabpanel" aria-labelledby="tab-btn-assumptions">
+<!-- ============ ASSUMPTIONS TAB (manager only) ============ -->
+<div class="tabpanel role-manager hidden-role" id="tab-assumptions" role="tabpanel" aria-labelledby="tab-btn-assumptions">
   <div class="card">
     <h2>Rate Assumptions &amp; Cost Benchmarks</h2>
     <p class="sub">These are the default unit rates every quote is built from. Review quarterly — several are tied to published market/SARS figures that change annually.</p>
@@ -346,13 +420,43 @@
       <button class="btn ghost" id="btnResetAssumptions">Reset to Suggested Defaults</button>
     </div>
   </div>
+
+  <div class="card">
+    <h2>Curriculum Day Reference</h2>
+    <p class="sub">SAQA credit basis behind the suggested Training/Assessment/Moderation/Revision defaults for each qualification</p>
+    <table class="stafflist" id="curriculumRefTable"></table>
+    <div class="note warn"><b>Important:</b> QCTO curricula specify credits and module outcomes, not a fixed day-count. The day defaults above are Tiespro's own scheduling design within that credit envelope. Confirm against Tiespro's current registered learning programme for each qualification before relying on them for a signed proposal.</div>
+  </div>
 </div>
 
-<!-- ============ SAVED QUOTES TAB ============ -->
+<!-- ============ STAFF & ACCESS TAB (manager only) ============ -->
+<div class="tabpanel role-manager hidden-role" id="tab-access" role="tabpanel" aria-labelledby="tab-btn-access">
+  <div class="card">
+    <h2>Staff &amp; Access</h2>
+    <p class="sub">Manage who can sign in, what auto-fills their "Prepared By" field, and who can see Rate Assumptions</p>
+    <div class="note warn"><b>Security note:</b> this directory (names, roles, PINs) is stored in this browser's local storage and is enforced entirely in-browser. Anyone with basic developer-tools knowledge could bypass it. Treat it as a convenience layer for a trusted internal team — not as protection for financial or client-sensitive data. For real access control, this app would need a server-side login.</div>
+    <table class="stafflist" id="staffTable"></table>
+    <h3>Add Staff Member</h3>
+    <div class="row3">
+      <div class="field"><label>Full Name</label><input type="text" id="newStaffName" placeholder="e.g. Thandeka Nkosi"></div>
+      <div class="field"><label>PIN (4–6 digits)</label><input type="password" id="newStaffPin" maxlength="6" placeholder="e.g. 2041" inputmode="numeric"></div>
+      <div class="field"><label>Role</label>
+        <select id="newStaffRole">
+          <option value="staff">Staff — Build &amp; save quotes, no Rate Assumptions access</option>
+          <option value="manager">Manager — Full access, incl. Rate Assumptions &amp; quote approval</option>
+        </select>
+      </div>
+    </div>
+    <div class="btnrow"><button class="btn primary" id="btnAddStaff">Add Staff Member</button></div>
+  </div>
+</div>
+
+<!-- ============ QUOTE TRACKER TAB ============ -->
 <div class="tabpanel" id="tab-saved" role="tabpanel" aria-labelledby="tab-btn-saved">
   <div class="card">
-    <h2>Saved Quotes</h2>
-    <p class="sub">Quotes saved on this device/browser. Load a quote to review, duplicate or re-issue with an updated discount.</p>
+    <h2>Quote Tracker</h2>
+    <p class="sub">Every saved quote, its approval status, and follow-up pipeline — so nothing sent to a client goes cold.</p>
+    <div class="statrow" id="trackerStats"></div>
     <div class="row2" style="margin-bottom:16px;">
       <div class="field" style="margin-bottom:0;"><input type="text" id="savedSearch" placeholder="Search by client or reference..."></div>
       <div class="btnrow" style="margin-top:0;justify-content:flex-end;">
@@ -377,9 +481,17 @@
     <p style="font-size:13px;line-height:1.6;">A <b>contingency buffer</b> covers things that go wrong on real programmes: learner no-shows, re-assessments, weather delays, last-minute venue changes. A <b>cost-of-capital charge</b> covers the fact that Tiespro pays facilitators, travel and materials up front, often before the client pays or before any SETA grant is reimbursed. A <b>compliance/accreditation overhead</b> covers the ongoing cost of keeping TETA accreditation current — audits, POE storage, QMS maintenance — spread across every paying programme.</p>
     <h3>3. Company overhead and target margin are applied</h3>
     <p style="font-size:13px;line-height:1.6;">A <b>company overhead allocation</b> (office, admin salaries, software, insurance) is added, then the <b>target gross margin</b> is applied to arrive at the List Price. The target margin defaults to 40% specifically so that even a full 25% discount still leaves a healthy margin — see the live indicator change colour as you move the discount slider.</p>
-    <h3>4. The discount slider never lets you quote a loss silently</h3>
-    <p style="font-size:13px;line-height:1.6;"><span class="pill green">Green</span> = margin at or above the minimum floor (default 20%). <span class="pill amber">Amber</span> = margin positive but below the floor — proceed with sign-off from a manager. <span class="pill red">Red</span> = the quote is at or below cost — do not send without repricing.</p>
-    <h3>5. Generating the client quote</h3>
+    <h3>4. Revision days are additional, not part of the standard programme</h3>
+    <p style="font-size:13px;line-height:1.6;">Revision Days (pre-EISA exam prep) are costed the same way as training days but kept in their own line, both internally and on the client quote, and the <b>discount slider never applies to them</b>. This keeps the standard programme fee comparable across quotes and makes clear to the client that revision support is a value-add, not a hidden cost buried in the base price.</p>
+    <h3>5. Training/assessment/moderation day defaults are sourced from SAQA credits</h3>
+    <p style="font-size:13px;line-height:1.6;">Selecting a qualification pre-fills days based on that qualification's registered SAQA credit value (see the Curriculum Day Reference table under Rate Assumptions). QCTO curricula define credits and outcomes, not a fixed day-count — the pre-filled numbers are Tiespro's own scheduling design and should be checked against the current registered learning programme, especially for Taxi Driver where a public credit record could not be confirmed.</p>
+    <h3>6. The discount slider never lets you quote a loss silently</h3>
+    <p style="font-size:13px;line-height:1.6;"><span class="pill green">Green</span> = margin at or above the minimum floor (default 20%). <span class="pill amber">Amber</span> = margin positive but below the floor, or discount above 15% — requires manager approval before the quote can be generated. <span class="pill red">Red</span> = the quote is at or below cost — blocked entirely, reprice before continuing.</p>
+    <h3>7. Manager approval</h3>
+    <p style="font-size:13px;line-height:1.6;">When a quote needs approval, click "Submit for Manager Approval" — this saves the quote as Pending. A signed-in manager reviews it from the Quote Tracker and approves or rejects with a comment. "Generate Client Quote" stays disabled until an approval is granted (or the quote is repriced into the green).</p>
+    <h3>8. Quote Tracker &amp; follow-up</h3>
+    <p style="font-size:13px;line-height:1.6;">Once a quote is sent, set its status to "Sent" and a follow-up date in the Quote Tracker. Overdue follow-ups (a follow-up date in the past with no resolution) are highlighted in red so nothing slips through.</p>
+    <h3>9. Generating the client quote</h3>
     <p style="font-size:13px;line-height:1.6;">The client-facing quote only ever shows packaged line items (Training Delivery, Assessment &amp; Moderation, Examination/EISA, Travel &amp; Logistics, Materials &amp; Compliance, Total) — it never reveals your internal cost breakdown or margin. Click "Generate Client Quote" to preview and print/save as PDF using your browser's print dialog.</p>
     <div class="note" style="margin-top:16px;"><b>Keep this current:</b> travel and subsistence rates are tied to SARS-published figures that change every tax year (1 March). Facilitator/assessor/EISA fees should be checked against your actual signed contractor and AQP agreements at least twice a year.</div>
   </div>
@@ -387,9 +499,9 @@
 
 </main>
 
-<footer style="background:var(--navy-dark);color:#8FA0C4;padding:18px 24px;font-size:11.5px;margin-top:auto;">
+<footer style="background:var(--navy-dark);color:#8FA0C4;padding:18px 24px;font-size:11.5px;margin-top:auto;flex-shrink:0;">
   <div style="max-width:1300px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-    <div>Tiespro Costing Tool <span id="appVersion">v3.0</span> · TETA 06-157 · Internal staff use only</div>
+    <div>Tiespro Costing Tool <span id="appVersion">v4.0</span> · TETA 06-157 · Internal staff use only</div>
     <div id="onlineStatus" style="display:flex;align-items:center;gap:6px;"><span id="onlineDot" style="width:8px;height:8px;border-radius:50%;background:#1B7A43;"></span><span id="onlineText">Online</span></div>
   </div>
 </footer>
@@ -413,7 +525,7 @@
   <table class="pq-table" id="pqPriceTable"></table>
 
   <div class="pq-terms">
-    This quotation is valid for 30 days from the date above. Pricing excludes VAT unless otherwise stated. Final scheduling is subject to written confirmation and a signed service agreement. Skills Development Levy (SDL) mandatory grant reclaims, Section 12H tax allowances and Employment Tax Incentive benefits, where applicable, accrue to the client directly and are not included in the price above. Travel and accommodation costs are estimated on the locality details supplied and will be confirmed on final scheduling. Tiespro Training Institute · CIPC 2005/026060/07 · TETA Accreditation 06-157.
+    This quotation is valid for 30 days from the date above. Pricing excludes VAT unless otherwise stated. Final scheduling is subject to written confirmation and a signed service agreement. Skills Development Levy (SDL) mandatory grant reclaims, Section 12H tax allowances and Employment Tax Incentive benefits, where applicable, accrue to the client directly and are not included in the price above. Travel and accommodation costs are estimated on the locality details supplied and will be confirmed on final scheduling. Revision days, where included, are an additional service beyond the standard programme. Tiespro Training Institute · CIPC 2005/026060/07 · TETA Accreditation 06-157.
   </div>
 </div>
 
@@ -453,11 +565,272 @@
     delete memoryStore[key]; return true;
   }
 
+  function fmtR(n){
+    n = Math.round(n||0);
+    return 'R' + n.toLocaleString('en-ZA');
+  }
+  function toast(msg){
+    var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+    setTimeout(function(){t.classList.remove('show');},2600);
+  }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+  // Escape user-generated text before injecting it into innerHTML.
+  function escapeHtml(str){
+    if(str == null) return '';
+    return String(str).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+
+  // =====================================================================
+  // STAFF DIRECTORY, ROLES & SIGN-IN
+  // =====================================================================
+  // No staff ship with this tool. The first person to open it on a device
+  // creates the first (Manager) account themselves - avoids ever putting
+  // real names/PINs in source control, and lets each install have its own
+  // team roster.
+  var staffDirectory = [];
+  var currentUser = null;
+
+  async function loadStaff(){
+    var saved = await storeGet('staff_directory');
+    if(saved){
+      try{ staffDirectory = JSON.parse(saved); }catch(e){ staffDirectory = []; }
+    } else {
+      staffDirectory = [];
+    }
+  }
+  async function saveStaff(){
+    await storeSet('staff_directory', JSON.stringify(staffDirectory));
+  }
+
+  function populateLoginNames(){
+    var sel = document.getElementById('loginName');
+    sel.innerHTML = staffDirectory.map(function(s){
+      return '<option value="'+escapeHtml(s.id)+'">'+escapeHtml(s.name)+' ('+(s.role==='manager'?'Manager':'Staff')+')</option>';
+    }).join('');
+  }
+
+  function applyRoleVisibility(){
+    var isManager = currentUser && currentUser.role === 'manager';
+    document.querySelectorAll('.role-manager').forEach(function(el){
+      if(isManager){
+        el.classList.remove('hidden-role');
+      } else {
+        el.classList.add('hidden-role');
+        if(el.classList.contains('tabpanel') && el.classList.contains('active')){
+          el.classList.remove('active');
+          document.getElementById('tab-build').classList.add('active');
+        }
+        if(el.classList.contains('tab-btn') && el.classList.contains('active')){
+          el.classList.remove('active');
+          el.setAttribute('aria-selected','false');
+          var buildBtn = document.querySelector('.tab-btn[data-tab="build"]');
+          buildBtn.classList.add('active');
+          buildBtn.setAttribute('aria-selected','true');
+          buildBtn.removeAttribute('tabindex');
+        }
+      }
+    });
+  }
+
+  async function doLogin(userId, pin){
+    var user = staffDirectory.find(function(s){ return s.id===userId; });
+    if(!user || user.pin !== pin) return false;
+    currentUser = {id:user.id, name:user.name, role:user.role};
+    await storeSet('session', JSON.stringify(currentUser));
+    onLoginSuccess();
+    return true;
+  }
+
+  function onLoginSuccess(){
+    document.getElementById('loginOverlay').style.display='none';
+    var whoami = document.getElementById('whoamiBox');
+    whoami.style.display='inline-block';
+    document.getElementById('whoamiName').textContent = currentUser.name;
+    document.getElementById('whoamiRole').textContent = '('+(currentUser.role==='manager'?'Manager':'Staff')+')';
+    document.getElementById('preparedBy').value = currentUser.name;
+    applyRoleVisibility();
+    calcAll();
+  }
+
+  async function tryAutoLogin(){
+    var saved = await storeGet('session');
+    if(saved){
+      try{
+        var u = JSON.parse(saved);
+        if(staffDirectory.find(function(s){return s.id===u.id;})){
+          currentUser = u;
+          onLoginSuccess();
+          return;
+        }
+      }catch(e){}
+    }
+    document.getElementById('loginOverlay').style.display='flex';
+    if(staffDirectory.length === 0){
+      document.getElementById('loginPane').style.display='none';
+      document.getElementById('setupPane').style.display='block';
+    } else {
+      document.getElementById('loginPane').style.display='block';
+      document.getElementById('setupPane').style.display='none';
+      populateLoginNames();
+    }
+  }
+
+  document.getElementById('btnLogin').addEventListener('click', async function(){
+    var userId = document.getElementById('loginName').value;
+    var pin = document.getElementById('loginPin').value.trim();
+    var ok = await doLogin(userId, pin);
+    if(!ok){
+      document.getElementById('loginErr').style.display='block';
+    } else {
+      document.getElementById('loginErr').style.display='none';
+      document.getElementById('loginPin').value='';
+    }
+  });
+  document.getElementById('loginPin').addEventListener('keydown', function(e){
+    if(e.key==='Enter') document.getElementById('btnLogin').click();
+  });
+
+  document.getElementById('btnSetup').addEventListener('click', async function(){
+    var name = document.getElementById('setupName').value.trim();
+    var pin = document.getElementById('setupPin').value.trim();
+    if(!name || !/^[0-9]{4,6}$/.test(pin)){
+      document.getElementById('setupErr').style.display='block';
+      return;
+    }
+    document.getElementById('setupErr').style.display='none';
+    var user = {id:'u'+Date.now(), name:name, pin:pin, role:'manager'};
+    staffDirectory = [user];
+    await saveStaff();
+    currentUser = {id:user.id, name:user.name, role:user.role};
+    await storeSet('session', JSON.stringify(currentUser));
+    populateLoginNames();
+    renderStaffTable();
+    onLoginSuccess();
+    toast('Manager account created: '+name);
+  });
+  document.getElementById('setupPin').addEventListener('keydown', function(e){
+    if(e.key==='Enter') document.getElementById('btnSetup').click();
+  });
+
+  document.getElementById('btnSwitchUser').addEventListener('click', async function(){
+    currentUser = null;
+    await storeDelete('session');
+    document.getElementById('whoamiBox').style.display='none';
+    document.getElementById('preparedBy').value='';
+    document.getElementById('loginOverlay').style.display='flex';
+    document.getElementById('loginPane').style.display='block';
+    document.getElementById('setupPane').style.display='none';
+    populateLoginNames();
+  });
+
+  // ---------- Staff & Access tab rendering (manager only) ----------
+  function renderStaffTable(){
+    var wrap = document.getElementById('staffTable');
+    var html = '<tr><th>Name</th><th>Role</th><th>PIN</th><th></th></tr>';
+    staffDirectory.forEach(function(s){
+      html += '<tr>'+
+        '<td>'+escapeHtml(s.name)+'</td>'+
+        '<td><span class="pill '+(s.role==='manager'?'green':'grey')+'">'+(s.role==='manager'?'Manager':'Staff')+'</span></td>'+
+        '<td>••••</td>'+
+        '<td><button class="btn danger" data-remove-staff="'+escapeHtml(s.id)+'" style="padding:5px 10px;font-size:11.5px;">Remove</button></td>'+
+        '</tr>';
+    });
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('[data-remove-staff]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if(staffDirectory.length<=1){ toast('At least one staff member must remain.'); return; }
+        var target = staffDirectory.find(function(s){ return s.id === btn.dataset.removeStaff; });
+        var managersLeft = staffDirectory.filter(function(s){ return s.role==='manager' && s.id !== btn.dataset.removeStaff; }).length;
+        if(target && target.role==='manager' && managersLeft===0){
+          toast('Cannot remove the only Manager — promote another staff member first.');
+          return;
+        }
+        if(!confirm('Remove this staff member? They will no longer be able to sign in.')) return;
+        staffDirectory = staffDirectory.filter(function(s){ return s.id !== btn.dataset.removeStaff; });
+        await saveStaff();
+        renderStaffTable();
+        populateLoginNames();
+        toast('Staff member removed.');
+      });
+    });
+  }
+  document.getElementById('btnAddStaff').addEventListener('click', async function(){
+    var name = document.getElementById('newStaffName').value.trim();
+    var pin = document.getElementById('newStaffPin').value.trim();
+    var role = document.getElementById('newStaffRole').value;
+    if(!name || !/^[0-9]{4,6}$/.test(pin)){ toast('Enter a name and a 4–6 digit PIN.'); return; }
+    staffDirectory.push({id:'u'+Date.now(), name:name, pin:pin, role:role});
+    await saveStaff();
+    renderStaffTable();
+    populateLoginNames();
+    document.getElementById('newStaffName').value='';
+    document.getElementById('newStaffPin').value='';
+    toast('Staff member added: '+name);
+  });
+
+  // =====================================================================
+  // QUALIFICATION / CURRICULUM REFERENCE (SAQA-sourced, with honest gaps)
+  // =====================================================================
+  // Declared here (ahead of QUALS/tabs/etc.) because the qualification
+  // select's initial change-dispatch below runs calcAll() -> renderBreakdown()
+  // -> renderApprovalPanel() synchronously during script load, and that chain
+  // reads currentApproval.
+  var currentApproval = {status:'none', by:'', date:'', comment:''};
+
+  var QUALS = {
+    cfa:   {name:'Clearing and Forwarding Agent', nqf:5, saqa:'96368',  credits:120, verified:true,
+            training:22, assessment:5, moderation:2, revision:3,
+            note:'SAQA 96368 · NQF 5 · 120 credits (1,200 notional hours).'},
+    scp:   {name:'Supply Chain Practitioner', nqf:5, saqa:'111445', credits:180, verified:true,
+            training:32, assessment:6, moderation:3, revision:4,
+            note:'SAQA 111445 · NQF 5 · 180 credits (1,800 notional hours). Note: this qualification has multiple registered versions cited between 180–189 credits — confirm the exact SAQA ID Tiespro is accredited against.'},
+    tc:    {name:'Transport Clerk', nqf:4, saqa:'—', credits:121, verified:true,
+            training:22, assessment:5, moderation:2, revision:3,
+            note:'NQF 4 · 121 credits (1,210 notional hours). SAQA ID not confirmed from public sources — verify against Tiespro’s TETA registration.'},
+    fh:    {name:'Freight Handler', nqf:3, saqa:'96396', credits:122, verified:true,
+            training:18, assessment:4, moderation:2, revision:2,
+            note:'SAQA 96396 · NQF 3 · 122 credits (1,220 notional hours).'},
+    td:    {name:'Truck Driver', nqf:3, saqa:'—', credits:130, verified:true,
+            training:20, assessment:5, moderation:2, revision:3,
+            note:'NQF 3 · 130 credits (1,300 notional hours). SAQA ID not confirmed from public sources — verify against Tiespro’s TETA registration.'},
+    bd:    {name:'Bus Driver', nqf:3, saqa:'94202', credits:120, verified:true,
+            training:18, assessment:4, moderation:2, revision:2,
+            note:'SAQA 94202 · NQF 3 · 120 credits (1,200 notional hours).'},
+    txd:   {name:'Taxi Driver', nqf:3, saqa:'—', credits:null, verified:false,
+            training:15, assessment:3, moderation:1, revision:2,
+            note:'Credit basis could not be confirmed from public SAQA/QCTO sources at the time this tool was built. Days shown are an estimate only — confirm against Tiespro’s registered learning programme before quoting.'},
+    custom:{name:'Other / Custom Programme', nqf:'', saqa:'', credits:null, verified:false,
+            training:0, assessment:0, moderation:0, revision:0,
+            note:'Enter days manually based on the specific programme’s curriculum.'}
+  };
+
+  function renderCurriculumRefTable(){
+    var wrap = document.getElementById('curriculumRefTable');
+    var html = '<tr><th>Qualification</th><th>NQF</th><th>SAQA ID</th><th>Credits</th><th>Suggested Days (T/A/M/Rev)</th></tr>';
+    Object.keys(QUALS).filter(function(k){return k!=='custom';}).forEach(function(k){
+      var q = QUALS[k];
+      html += '<tr>'+
+        '<td>'+escapeHtml(q.name)+(q.verified?'':' <span class="pill amber">Unverified</span>')+'</td>'+
+        '<td>'+escapeHtml(q.nqf)+'</td>'+
+        '<td>'+escapeHtml(q.saqa)+'</td>'+
+        '<td>'+(q.credits||'—')+'</td>'+
+        '<td>'+q.training+' / '+q.assessment+' / '+q.moderation+' / '+q.revision+'</td>'+
+        '</tr>';
+    });
+    wrap.innerHTML = html;
+  }
+
   // ---------- Tabs ----------
   var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+  function visibleTabBtns(){
+    return tabBtns.filter(function(b){ return !b.classList.contains('hidden-role'); });
+  }
   function switchTab(targetTab){
     var targetBtn = document.querySelector('.tab-btn[data-tab="'+targetTab+'"]');
-    if(!targetBtn) return;
+    if(!targetBtn || targetBtn.classList.contains('hidden-role')) return;
     tabBtns.forEach(function(b){
       b.classList.remove('active');
       b.setAttribute('aria-selected','false');
@@ -474,19 +847,17 @@
   tabBtns.forEach(function(btn){
     btn.addEventListener('click', function(){ switchTab(btn.dataset.tab); });
     btn.addEventListener('keydown', function(e){
-      var idx = tabBtns.indexOf(btn);
+      var vis = visibleTabBtns();
+      var idx = vis.indexOf(btn);
+      if(idx === -1) return;
       if(e.key==='ArrowRight' || e.key==='ArrowDown'){
-        e.preventDefault();
-        var next = tabBtns[(idx+1)%tabBtns.length];
-        switchTab(next.dataset.tab);
+        e.preventDefault(); switchTab(vis[(idx+1)%vis.length].dataset.tab);
       } else if(e.key==='ArrowLeft' || e.key==='ArrowUp'){
-        e.preventDefault();
-        var prev = tabBtns[(idx-1+tabBtns.length)%tabBtns.length];
-        switchTab(prev.dataset.tab);
+        e.preventDefault(); switchTab(vis[(idx-1+vis.length)%vis.length].dataset.tab);
       } else if(e.key==='Home'){
-        e.preventDefault(); switchTab(tabBtns[0].dataset.tab);
+        e.preventDefault(); switchTab(vis[0].dataset.tab);
       } else if(e.key==='End'){
-        e.preventDefault(); switchTab(tabBtns[tabBtns.length-1].dataset.tab);
+        e.preventDefault(); switchTab(vis[vis.length-1].dataset.tab);
       }
     });
   });
@@ -503,31 +874,16 @@
       } else if(e.key==='1'){
         e.preventDefault(); switchTab('build');
       } else if(e.key==='2'){
-        e.preventDefault(); switchTab('assumptions');
-      } else if(e.key==='3'){
         e.preventDefault(); switchTab('saved');
+      } else if(e.key==='3'){
+        e.preventDefault(); switchTab('assumptions');
       } else if(e.key==='4'){
+        e.preventDefault(); switchTab('access');
+      } else if(e.key==='5'){
         e.preventDefault(); switchTab('help');
       }
     }
   });
-
-  function fmtR(n){
-    n = Math.round(n||0);
-    return 'R' + n.toLocaleString('en-ZA');
-  }
-  function toast(msg){
-    var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-    setTimeout(function(){t.classList.remove('show');},2200);
-  }
-
-  // Escape user-generated text before injecting it into innerHTML.
-  function escapeHtml(str){
-    if(str == null) return '';
-    return String(str).replace(/[&<>"']/g, function(m){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-    });
-  }
 
   // Clamp numeric inputs to their min/max attributes so manual entry can't break the model.
   function clampNumberInput(el){
@@ -543,25 +899,39 @@
   }
 
   // Mark required fields as invalid when they are empty or below minimums.
-  function validateQuote(){
-    var checks = [
-      {id:'clientName', test:function(v){return v.trim().length>0;}},
-      {id:'quoteRef', test:function(v){return v.trim().length>0;}},
-      {id:'quoteDate', test:function(v){return v.length>0;}},
-      {id:'numLearners', test:function(v){return parseFloat(v)>=1;}},
-      {id:'travellers', test:function(v){return parseFloat(v)>=1;}}
-    ];
+  // Errors are only *displayed* for a field once the user has left it (blur)
+  // or attempted to generate a quote - otherwise every field would show red
+  // on a completely fresh, untouched page load.
+  var REQUIRED_CHECKS = [
+    {id:'clientName', test:function(v){return v.trim().length>0;}},
+    {id:'quoteRef', test:function(v){return v.trim().length>0;}},
+    {id:'quoteDate', test:function(v){return v.length>0;}},
+    {id:'numLearners', test:function(v){return parseFloat(v)>=1;}},
+    {id:'travellers', test:function(v){return parseFloat(v)>=1;}}
+  ];
+  var touchedFields = {};
+  var revealAllErrors = false;
+
+  function validateQuote(reveal){
+    if(reveal) revealAllErrors = true;
     var valid = true;
-    checks.forEach(function(c){
+    REQUIRED_CHECKS.forEach(function(c){
       var el = document.getElementById(c.id);
       var err = document.getElementById('err-'+c.id);
       var ok = c.test(el.value);
-      el.classList.toggle('invalid', !ok);
-      if(err) err.style.display = ok ? 'none' : 'block';
+      var show = !!((revealAllErrors || touchedFields[c.id]) && !ok);
+      el.classList.toggle('invalid', show);
+      if(err) err.style.display = show ? 'block' : 'none';
       if(!ok) valid = false;
     });
     return valid;
   }
+  REQUIRED_CHECKS.forEach(function(c){
+    document.getElementById(c.id).addEventListener('blur', function(){
+      touchedFields[c.id] = true;
+      validateQuote();
+    });
+  });
 
   // ---------- Discount slider (declared early: referenced by calcAll, which other setup below triggers immediately) ----------
   var discountSlider = document.getElementById('discountSlider');
@@ -578,14 +948,19 @@
     return 'TQ-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+Math.floor(Math.random()*90+10);
   }
   qRef.value = genRef();
-  qDate.value = new Date().toISOString().slice(0,10);
+  qDate.value = todayISO();
+  qRef.addEventListener('change', refreshCurrentApproval);
 
   // ---------- Qualification select prefill ----------
   var qualSel = document.getElementById('qualification');
   qualSel.addEventListener('change', function(){
-    var parts = qualSel.value.split('|');
-    document.getElementById('nqfLevel').value = parts[1]==='0' ? '' : parts[1];
-    document.getElementById('trainingDays').value = parts[2];
+    var q = QUALS[qualSel.value] || QUALS.custom;
+    document.getElementById('nqfLevel').value = q.nqf || '';
+    document.getElementById('trainingDays').value = q.training;
+    document.getElementById('assessmentDays').value = q.assessment;
+    document.getElementById('moderationDays').value = q.moderation;
+    document.getElementById('revisionDays').value = q.revision;
+    document.getElementById('qualRefNote').innerHTML = '<b>Curriculum basis:</b> ' + escapeHtml(q.note);
     calcAll();
   });
   qualSel.dispatchEvent(new Event('change'));
@@ -641,7 +1016,7 @@
   assumptionIds.forEach(function(id){ document.getElementById(id).addEventListener('input', calcAll); });
 
   // ---------- Build-quote field listeners ----------
-  ['clientName','quoteRef','preparedBy','quoteDate','nqfLevel','numLearners','trainingDays','assessmentDays','moderationDays',
+  ['clientName','quoteRef','preparedBy','quoteDate','nqfLevel','numLearners','trainingDays','assessmentDays','moderationDays','revisionDays',
    'durationMonths','distanceKm','numTrips','travellers','nights','personDaysAway'].forEach(function(id){
     document.getElementById(id).addEventListener('input', calcAll);
   });
@@ -657,7 +1032,9 @@
     });
   });
 
-  // ---------- Core calculation ----------
+  // =====================================================================
+  // CORE CALCULATION
+  // =====================================================================
   var lastCalc = {};
 
   function calcAll(){
@@ -667,6 +1044,7 @@
     var trainingDays = v('trainingDays');
     var assessmentDays = v('assessmentDays');
     var moderationDays = v('moderationDays');
+    var revisionDays = v('revisionDays');
     var delivery = document.querySelector('input[name="delivery"]:checked').value;
     var eisaOn = document.getElementById('eisaRequired').checked;
     var externalModOn = document.getElementById('externalMod').checked;
@@ -681,7 +1059,7 @@
         rContingency=v('rContingency'), rFinancing=v('rFinancing'), rCompliance=v('rCompliance'),
         rOverhead=v('rOverhead'), rTargetMargin=v('rTargetMargin'), rMinMargin=v('rMinMargin'), rVAT=v('rVAT');
 
-    // People costs
+    // People costs (standard programme)
     var costFacilitator = rFacilitator * trainingDays;
     var costAssessor = rAssessor * assessmentDays;
     var costModerator = rModerator * moderationDays;
@@ -716,7 +1094,7 @@
 
     var subtotalDirect = peopleTotal + logisticsTotal + learnerTotal;
 
-    // Hidden/consequential buffers
+    // Hidden/consequential buffers (standard programme)
     var contingencyAmt = subtotalDirect * (rContingency/100);
     var financingAmt = subtotalDirect * (rFinancing/100);
     var complianceAmt = subtotalDirect * (rCompliance/100);
@@ -732,15 +1110,32 @@
     var marginFrac = Math.min(0.95, Math.max(0, rTargetMargin/100));
     var listPrice = fullyLoadedCost / (1 - marginFrac);
 
-    // Discount
+    // Discount (standard programme only)
     var discountPct = parseFloat(discountSlider.value);
-    var finalPrice = listPrice * (1 - discountPct/100);
-    var marginAtDiscount = finalPrice > 0 ? (finalPrice - fullyLoadedCost) / finalPrice : 0;
+    var finalStandardPrice = listPrice * (1 - discountPct/100);
+    var marginAtDiscount = finalStandardPrice > 0 ? (finalStandardPrice - fullyLoadedCost) / finalStandardPrice : 0;
 
     // Max discount that still hits the minimum margin floor
     var minMarginFrac = rMinMargin/100;
     var priceAtFloor = fullyLoadedCost / (1 - minMarginFrac);
     var maxDiscountAtFloor = listPrice > 0 ? (1 - priceAtFloor/listPrice) * 100 : 0;
+
+    // ---- Revision days: additional line, priced at target margin, never discounted ----
+    var revisionDirect = rFacilitator * revisionDays;
+    var revisionHidden = revisionDirect * ((rContingency+rFinancing+rCompliance)/100);
+    var revisionCostPlusHidden = revisionDirect + revisionHidden;
+    var revisionOverhead = revisionCostPlusHidden * (rOverhead/100);
+    var revisionFullyLoaded = revisionCostPlusHidden + revisionOverhead;
+    var revisionListPrice = revisionDays > 0 ? (revisionFullyLoaded / (1 - marginFrac)) : 0;
+
+    var finalPrice = finalStandardPrice + revisionListPrice;
+    var totalFullyLoaded = fullyLoadedCost + revisionFullyLoaded;
+    var blendedMarginPct = finalPrice > 0 ? ((finalPrice - totalFullyLoaded) / finalPrice) * 100 : 0;
+
+    // ---- Manager-approval requirement ----
+    var marginPct = marginAtDiscount * 100;
+    var isLoss = marginPct < 0;
+    var approvalRequired = !isLoss && (marginPct < rMinMargin || discountPct > 15);
 
     lastCalc = {
       numLearners: numLearners, delivery: delivery, eisaOn: eisaOn,
@@ -751,9 +1146,12 @@
       costEISAfees: costEISAfees, costCert: costCert, costInsurance: costInsurance,
       subtotalDirect: subtotalDirect, contingencyAmt: contingencyAmt, financingAmt: financingAmt, complianceAmt: complianceAmt,
       hiddenTotal: hiddenTotal, overheadAmt: overheadAmt, fullyLoadedCost: fullyLoadedCost,
-      listPrice: listPrice, discountPct: discountPct, finalPrice: finalPrice, marginAtDiscount: marginAtDiscount,
+      listPrice: listPrice, discountPct: discountPct, finalStandardPrice: finalStandardPrice, marginAtDiscount: marginAtDiscount,
       maxDiscountAtFloor: maxDiscountAtFloor, rVAT: rVAT, rMinMargin: rMinMargin,
-      trainingDays: trainingDays, assessmentDays: assessmentDays, moderationDays: moderationDays
+      trainingDays: trainingDays, assessmentDays: assessmentDays, moderationDays: moderationDays, revisionDays: revisionDays,
+      revisionDirect: revisionDirect, revisionFullyLoaded: revisionFullyLoaded, revisionListPrice: revisionListPrice,
+      finalPrice: finalPrice, totalFullyLoaded: totalFullyLoaded, blendedMarginPct: blendedMarginPct,
+      isLoss: isLoss, approvalRequired: approvalRequired, marginPct: marginPct
     };
 
     validateQuote();
@@ -765,6 +1163,7 @@
     var t = document.getElementById('costTable');
     var rows = [];
     function cat(label){ rows.push('<tr class="category"><td colspan="2">'+label+'</td></tr>'); }
+    function addoncat(label){ rows.push('<tr class="addoncat"><td colspan="2">'+label+'</td></tr>'); }
     function line(label, amt){ rows.push('<tr><td>'+label+'</td><td class="amt">'+fmtR(amt)+'</td></tr>'); }
 
     cat('Facilitation, Assessment &amp; Moderation');
@@ -796,47 +1195,144 @@
     line('Compliance &amp; accreditation overhead', c.complianceAmt);
     line('Company overhead allocation', c.overheadAmt);
 
-    rows.push('<tr class="total"><td>Fully Loaded Cost</td><td class="amt">'+fmtR(c.fullyLoadedCost)+'</td></tr>');
+    rows.push('<tr class="total"><td>Fully Loaded Cost (standard programme)</td><td class="amt">'+fmtR(c.fullyLoadedCost)+'</td></tr>');
     rows.push('<tr class="sub"><td>List Price at target margin (before discount)</td><td class="amt">'+fmtR(c.listPrice)+'</td></tr>');
+    rows.push('<tr class="sub"><td>Standard programme price after discount</td><td class="amt">'+fmtR(c.finalStandardPrice)+'</td></tr>');
+
+    if(c.revisionDays > 0){
+      addoncat('Additional: Revision Days (not discounted)');
+      line('Facilitator revision days ('+c.revisionDays+' days, at target margin)', c.revisionListPrice);
+    }
+
+    rows.push('<tr class="grandtotal"><td>Total Quoted Price (excl. VAT)</td><td class="amt">'+fmtR(c.finalPrice)+'</td></tr>');
 
     t.innerHTML = rows.join('');
 
     document.getElementById('discountVal').textContent = c.discountPct + '%';
-    document.getElementById('marginAtDiscount').textContent = 'Margin at this discount: ' + (c.marginAtDiscount*100).toFixed(1) + '%';
+    document.getElementById('marginAtDiscount').textContent = 'Standard programme margin: ' + c.marginPct.toFixed(1) + '%';
 
     document.getElementById('finalPrice').textContent = fmtR(c.finalPrice);
     var perLearner = c.numLearners>0 ? c.finalPrice/c.numLearners : 0;
-    document.getElementById('perLearnerPrice').textContent = fmtR(perLearner) + ' per learner · excl. VAT (' + c.rVAT + '% VAT = ' + fmtR(c.finalPrice*c.rVAT/100) + ')';
+    document.getElementById('perLearnerPrice').textContent = fmtR(perLearner) + ' per learner · excl. VAT (' + c.rVAT + '% VAT = ' + fmtR(c.finalPrice*c.rVAT/100) + ') · blended margin ' + c.blendedMarginPct.toFixed(1) + '%';
 
     var ind = document.getElementById('marginIndicator');
-    var marginPct = c.marginAtDiscount*100;
-    if(marginPct >= c.rMinMargin){
-      ind.className='indicator green';
-      ind.innerHTML='<span class="dot"></span> Healthy margin: '+marginPct.toFixed(1)+'% — at or above your '+c.rMinMargin+'% floor. Safe to quote.';
-    } else if(marginPct >= 0){
-      ind.className='indicator amber';
-      ind.innerHTML='<span class="dot"></span> Below target: '+marginPct.toFixed(1)+'% margin (floor is '+c.rMinMargin+'%). Maximum discount to stay at the floor is '+Math.max(0,c.maxDiscountAtFloor).toFixed(1)+'%. Get manager sign-off before sending.';
-    } else {
+    if(c.isLoss){
       ind.className='indicator red';
-      ind.innerHTML='<span class="dot"></span> Loss-making at '+marginPct.toFixed(1)+'% margin. Do not send this quote — reduce discount or revise scope.';
+      ind.innerHTML='<span class="dot"></span> Loss-making at '+c.marginPct.toFixed(1)+'% margin. Do not send this quote — reduce discount or revise scope.';
+    } else if(c.marginPct < c.rMinMargin || c.discountPct > 15){
+      ind.className='indicator amber';
+      ind.innerHTML='<span class="dot"></span> '+c.marginPct.toFixed(1)+'% margin at '+c.discountPct+'% discount. Maximum discount to stay at the '+c.rMinMargin+'% floor is '+Math.max(0,c.maxDiscountAtFloor).toFixed(1)+'%. Manager approval required before sending.';
+    } else {
+      ind.className='indicator green';
+      ind.innerHTML='<span class="dot"></span> Healthy margin: '+c.marginPct.toFixed(1)+'% — at or above your '+c.rMinMargin+'% floor. Safe to quote.';
     }
+
+    renderApprovalPanel();
   }
 
-  // ---------- Save / Load quotes ----------
-  document.getElementById('btnSave').addEventListener('click', async function(){
-    var id = 'quote:'+Date.now();
-    var record = {
-      id:id,
+  // =====================================================================
+  // MANAGER APPROVAL WORKFLOW
+  // =====================================================================
+  // (currentApproval itself is declared earlier, before QUALS, since the
+  // qualification select's initial change-dispatch triggers calcAll() ->
+  // renderBreakdown() -> renderApprovalPanel() synchronously at script load,
+  // before this point in the file would otherwise have run.)
+
+  async function refreshCurrentApproval(){
+    var ref = qRef.value.trim();
+    if(!ref){ currentApproval = {status:'none', by:'', date:'', comment:''}; renderApprovalPanel(); return; }
+    var val = await storeGet('quote:'+ref);
+    if(val){
+      try{
+        var r = JSON.parse(val);
+        currentApproval = {status:r.approvalStatus||'none', by:r.approvedBy||'', date:r.approvalDate||'', comment:r.approvalComment||''};
+      }catch(e){ currentApproval = {status:'none', by:'', date:'', comment:''}; }
+    } else {
+      currentApproval = {status:'none', by:'', date:'', comment:''};
+    }
+    renderApprovalPanel();
+  }
+
+  function renderApprovalPanel(){
+    var c = lastCalc;
+    var panel = document.getElementById('approvalPanel');
+    var genBtn = document.getElementById('btnGenerate');
+    if(!c.approvalRequired || c.isLoss){
+      panel.innerHTML='';
+      genBtn.disabled = !!c.isLoss;
+      genBtn.title = c.isLoss ? 'Loss-making quote — reprice before generating.' : '';
+      return;
+    }
+    if(currentApproval.status === 'approved'){
+      panel.innerHTML = '<div class="approvalbox approved"><b>Approved</b> by '+escapeHtml(currentApproval.by)+' on '+escapeHtml(currentApproval.date)+'. '+(currentApproval.comment?('Comment: '+escapeHtml(currentApproval.comment)):'')+'</div>';
+      genBtn.disabled = false; genBtn.title='';
+      return;
+    }
+    if(currentApproval.status === 'rejected'){
+      panel.innerHTML = '<div class="approvalbox rejected"><b>Rejected</b> by '+escapeHtml(currentApproval.by)+' on '+escapeHtml(currentApproval.date)+'. Comment: '+escapeHtml(currentApproval.comment||'—')+'. Revise the quote and submit again.</div>';
+      genBtn.disabled = true; genBtn.title='This quote was rejected — revise and resubmit for approval.';
+      return;
+    }
+    if(currentApproval.status === 'pending'){
+      var mgrControls = (currentUser && currentUser.role==='manager') ?
+        '<textarea id="approvalCommentInput" placeholder="Optional comment"></textarea>'+
+        '<div class="btnrow"><button class="btn approve" id="btnApproveNow" type="button">Approve</button><button class="btn danger" id="btnRejectNow" type="button">Reject</button></div>' :
+        '<div style="margin-top:6px;">Waiting for a manager to review in the Quote Tracker.</div>';
+      panel.innerHTML = '<div class="approvalbox pending"><b>Pending manager approval</b> — this discount/margin needs sign-off before the quote can be generated.'+mgrControls+'</div>';
+      genBtn.disabled = true; genBtn.title='Awaiting manager approval.';
+      bindApprovalActions();
+      return;
+    }
+    panel.innerHTML = '<div class="approvalbox pending"><b>Manager approval required</b> for this discount/margin. Save the quote, then click "Submit for Manager Approval" below.</div>'+
+      '<div class="btnrow"><button class="btn ghost" id="btnSubmitApproval" type="button">Submit for Manager Approval</button></div>';
+    genBtn.disabled = true; genBtn.title='Submit for manager approval first.';
+    var submitBtn = document.getElementById('btnSubmitApproval');
+    if(submitBtn) submitBtn.addEventListener('click', async function(){
+      var r = await saveCurrentQuote({approvalStatus:'pending'});
+      if(!r) return;
+      await refreshCurrentApproval();
+      toast('Submitted for manager approval.');
+    });
+  }
+
+  function bindApprovalActions(){
+    var appBtn = document.getElementById('btnApproveNow');
+    var rejBtn = document.getElementById('btnRejectNow');
+    if(appBtn) appBtn.addEventListener('click', async function(){
+      var comment = document.getElementById('approvalCommentInput').value;
+      await saveCurrentQuote({approvalStatus:'approved', approvedBy:currentUser.name, approvalDate:todayISO(), approvalComment:comment});
+      await refreshCurrentApproval();
+      toast('Quote approved.');
+    });
+    if(rejBtn) rejBtn.addEventListener('click', async function(){
+      var comment = document.getElementById('approvalCommentInput').value;
+      if(!comment){ alert('Please add a comment explaining the rejection.'); return; }
+      await saveCurrentQuote({approvalStatus:'rejected', approvedBy:currentUser.name, approvalDate:todayISO(), approvalComment:comment});
+      await refreshCurrentApproval();
+      toast('Quote rejected.');
+    });
+  }
+
+  // =====================================================================
+  // SAVE / LOAD / TRACK QUOTES
+  // =====================================================================
+  function buildRecord(){
+    var ref = document.getElementById('quoteRef').value.trim() || genRef();
+    var q = QUALS[qualSel.value] || QUALS.custom;
+    return {
+      id: 'quote:'+ref,
+      quoteRef: ref,
       clientName: document.getElementById('clientName').value || 'Unnamed client',
-      quoteRef: document.getElementById('quoteRef').value,
       preparedBy: document.getElementById('preparedBy').value,
       quoteDate: document.getElementById('quoteDate').value,
-      qualification: document.getElementById('qualification').value,
+      qualification: qualSel.value,
+      qualificationName: q.name,
       nqfLevel: document.getElementById('nqfLevel').value,
       numLearners: document.getElementById('numLearners').value,
       trainingDays: document.getElementById('trainingDays').value,
       assessmentDays: document.getElementById('assessmentDays').value,
       moderationDays: document.getElementById('moderationDays').value,
+      revisionDays: document.getElementById('revisionDays').value,
       durationMonths: document.getElementById('durationMonths').value,
       eisaRequired: document.getElementById('eisaRequired').checked,
       externalMod: document.getElementById('externalMod').checked,
@@ -850,20 +1346,66 @@
       personDaysAway: document.getElementById('personDaysAway').value,
       discountPct: discountSlider.value,
       finalPrice: lastCalc.finalPrice,
-      fullyLoadedCost: lastCalc.fullyLoadedCost,
-      marginAtDiscount: lastCalc.marginAtDiscount,
+      fullyLoadedCost: lastCalc.totalFullyLoaded,
+      marginAtDiscount: lastCalc.blendedMarginPct/100,
+      approvalRequired: lastCalc.approvalRequired,
+      approvalStatus: currentApproval.status,
+      approvedBy: currentApproval.by,
+      approvalDate: currentApproval.date,
+      approvalComment: currentApproval.comment,
+      pipelineStatus: 'draft',
+      sentDate: '',
+      followUpDate: '',
+      activityLog: [],
       savedAt: new Date().toISOString()
     };
-    await storeSet(id, JSON.stringify(record));
-    toast('Quote saved: '+record.quoteRef);
+  }
+
+  async function saveCurrentQuote(overrides){
+    if(!validateQuote(true)){
+      toast('Please fix the highlighted fields before saving.');
+      return null;
+    }
+    var ref = document.getElementById('quoteRef').value.trim();
+    var key = 'quote:'+ref;
+    var existingRaw = await storeGet(key);
+    var existing = null;
+    if(existingRaw){ try{ existing = JSON.parse(existingRaw); }catch(e){} }
+    var record = buildRecord();
+    if(existing){
+      record.pipelineStatus = existing.pipelineStatus || 'draft';
+      record.sentDate = existing.sentDate || '';
+      record.followUpDate = existing.followUpDate || '';
+      record.activityLog = existing.activityLog || [];
+      if(!overrides || !overrides.approvalStatus){
+        record.approvalStatus = existing.approvalStatus || 'none';
+        record.approvedBy = existing.approvedBy || '';
+        record.approvalDate = existing.approvalDate || '';
+        record.approvalComment = existing.approvalComment || '';
+      }
+    }
+    if(overrides) Object.assign(record, overrides);
+    if(overrides && overrides.approvalStatus){
+      record.activityLog.push({date:new Date().toISOString(), user:(currentUser?currentUser.name:'Unknown'), note:'Approval status set to '+overrides.approvalStatus+(overrides.approvalComment?(' — '+overrides.approvalComment):'')});
+    }
+    await storeSet(key, JSON.stringify(record));
+    return record;
+  }
+
+  document.getElementById('btnSave').addEventListener('click', async function(){
+    var r = await saveCurrentQuote();
+    if(r){ toast('Quote saved: '+r.quoteRef); clearDirty(); await refreshCurrentApproval(); }
   });
 
+  // ---------- Quote Tracker rendering ----------
   async function renderSavedList(){
     var keys = await storeListKeys('quote:');
     var wrap = document.getElementById('savedListWrap');
+    var statsWrap = document.getElementById('trackerStats');
     var search = (document.getElementById('savedSearch').value || '').toLowerCase();
     if(!keys || keys.length===0){
       wrap.innerHTML = '<div class="emptystate">No quotes saved yet — build a quote and click "Save Quote".</div>';
+      statsWrap.innerHTML = '';
       return;
     }
     var records = [];
@@ -872,6 +1414,25 @@
       if(val){ try{ records.push(JSON.parse(val)); }catch(e){} }
     }
     records.sort(function(a,b){ return new Date(b.savedAt) - new Date(a.savedAt); });
+
+    var today = todayISO();
+    var pendingCount=0, overdueCount=0, sentCount=0, wonCount=0, lostCount=0;
+    records.forEach(function(r){
+      if(r.approvalStatus==='pending') pendingCount++;
+      if(r.pipelineStatus==='sent' || r.pipelineStatus==='follow_up_due'){
+        sentCount++;
+        if(r.followUpDate && r.followUpDate < today) overdueCount++;
+      }
+      if(r.pipelineStatus==='won') wonCount++;
+      if(r.pipelineStatus==='lost') lostCount++;
+    });
+    statsWrap.innerHTML =
+      '<div class="statchip"><div class="n">'+records.length+'</div><div class="l">Total Quotes</div></div>'+
+      '<div class="statchip'+(pendingCount?' warn':'')+'"><div class="n">'+pendingCount+'</div><div class="l">Pending Approval</div></div>'+
+      '<div class="statchip"><div class="n">'+sentCount+'</div><div class="l">Sent / Awaiting</div></div>'+
+      '<div class="statchip'+(overdueCount?' warn':'')+'"><div class="n">'+overdueCount+'</div><div class="l">Follow-up Overdue</div></div>'+
+      '<div class="statchip"><div class="n">'+wonCount+'</div><div class="l">Won</div></div>'+
+      '<div class="statchip"><div class="n">'+lostCount+'</div><div class="l">Lost</div></div>';
 
     if(search){
       records = records.filter(function(r){
@@ -883,24 +1444,37 @@
       return;
     }
 
-    var html = '<table class="savedlist"><tr><th>Quote Ref</th><th>Client</th><th>Date</th><th>Learners</th><th>Discount</th><th>Price</th><th>Margin</th><th></th></tr>';
+    var html = '<div style="overflow-x:auto;"><table class="savedlist"><tr><th>Quote Ref</th><th>Client</th><th>Prepared By</th><th>Price</th><th>Margin</th><th>Approval</th><th>Pipeline</th><th>Follow-up</th><th>Actions</th></tr>';
     records.forEach(function(r){
       var marginPct = (r.marginAtDiscount*100);
       var pillClass = marginPct >= 20 ? 'green' : (marginPct>=0 ? 'amber':'red');
-      html += '<tr>'+
+      var apPill = {none:'grey', pending:'amber', approved:'green', rejected:'red'}[r.approvalStatus||'none'];
+      var apLabel = {none:'—', pending:'Pending', approved:'Approved', rejected:'Rejected'}[r.approvalStatus||'none'];
+      var pipelineStatus = r.pipelineStatus || 'draft';
+      var overdue = r.followUpDate && r.followUpDate < today && (pipelineStatus==='sent'||pipelineStatus==='follow_up_due');
+
+      var statusOptions = ['draft','sent','follow_up_due','won','lost'].map(function(s){
+        var labels = {draft:'Draft',sent:'Sent',follow_up_due:'Follow-up Due',won:'Won',lost:'Lost'};
+        return '<option value="'+s+'"'+(pipelineStatus===s?' selected':'')+'>'+labels[s]+'</option>';
+      }).join('');
+
+      var canApprove = currentUser && currentUser.role==='manager' && r.approvalStatus==='pending';
+
+      html += '<tr class="'+(overdue?'overdue':'')+'">'+
         '<td>'+escapeHtml(r.quoteRef)+'</td>'+
         '<td>'+escapeHtml(r.clientName)+'</td>'+
-        '<td>'+escapeHtml(r.quoteDate)+'</td>'+
-        '<td>'+escapeHtml(r.numLearners)+'</td>'+
-        '<td>'+escapeHtml(r.discountPct)+'%</td>'+
+        '<td>'+escapeHtml(r.preparedBy||'—')+'</td>'+
         '<td>'+fmtR(r.finalPrice)+'</td>'+
         '<td><span class="pill '+pillClass+'">'+marginPct.toFixed(1)+'%</span></td>'+
+        '<td><span class="pill '+apPill+'">'+apLabel+'</span>'+(canApprove?' <button class="btn approve" data-quickapprove="'+escapeHtml(r.id)+'" style="padding:3px 8px;font-size:10.5px;margin-top:4px;">Approve</button>':'')+'</td>'+
+        '<td><select data-status="'+escapeHtml(r.id)+'">'+statusOptions+'</select></td>'+
+        '<td><input type="date" data-followup="'+escapeHtml(r.id)+'" value="'+escapeHtml(r.followUpDate||'')+'"></td>'+
         '<td><button class="btn ghost" data-load="'+escapeHtml(r.id)+'" style="padding:5px 10px;font-size:11.5px;">Load</button> '+
         '<button class="btn ghost" data-dup="'+escapeHtml(r.id)+'" style="padding:5px 10px;font-size:11.5px;">Dup</button> '+
         '<button class="btn danger" data-del="'+escapeHtml(r.id)+'" style="padding:5px 10px;font-size:11.5px;">Del</button></td>'+
         '</tr>';
     });
-    html += '</table>';
+    html += '</table></div>';
     wrap.innerHTML = html;
 
     wrap.querySelectorAll('[data-load]').forEach(function(btn){
@@ -914,8 +1488,12 @@
         var val = await storeGet(btn.dataset.dup);
         if(!val) return;
         var r = JSON.parse(val);
-        r.id = 'quote:'+Date.now();
         r.quoteRef = r.quoteRef + '-COPY';
+        r.id = 'quote:'+r.quoteRef;
+        r.pipelineStatus = 'draft';
+        r.sentDate = ''; r.followUpDate = '';
+        r.approvalStatus = 'none'; r.approvedBy=''; r.approvalDate=''; r.approvalComment='';
+        r.activityLog = [];
         r.savedAt = new Date().toISOString();
         await storeSet(r.id, JSON.stringify(r));
         renderSavedList();
@@ -928,6 +1506,42 @@
         await storeDelete(btn.dataset.del);
         renderSavedList();
         toast('Quote deleted.');
+      });
+    });
+    wrap.querySelectorAll('[data-status]').forEach(function(sel){
+      sel.addEventListener('change', async function(){
+        var raw = await storeGet(sel.dataset.status);
+        if(!raw) return;
+        var r = JSON.parse(raw);
+        r.pipelineStatus = sel.value;
+        if(sel.value==='sent' && !r.sentDate) r.sentDate = todayISO();
+        r.activityLog = r.activityLog || [];
+        r.activityLog.push({date:new Date().toISOString(), user:(currentUser?currentUser.name:'Unknown'), note:'Pipeline status set to '+sel.value});
+        await storeSet(sel.dataset.status, JSON.stringify(r));
+        renderSavedList();
+      });
+    });
+    wrap.querySelectorAll('[data-followup]').forEach(function(inp){
+      inp.addEventListener('change', async function(){
+        var raw = await storeGet(inp.dataset.followup);
+        if(!raw) return;
+        var r = JSON.parse(raw);
+        r.followUpDate = inp.value;
+        await storeSet(inp.dataset.followup, JSON.stringify(r));
+        renderSavedList();
+      });
+    });
+    wrap.querySelectorAll('[data-quickapprove]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var raw = await storeGet(btn.dataset.quickapprove);
+        if(!raw) return;
+        var r = JSON.parse(raw);
+        r.approvalStatus='approved'; r.approvedBy=currentUser.name; r.approvalDate=todayISO();
+        r.activityLog = r.activityLog || [];
+        r.activityLog.push({date:new Date().toISOString(), user:currentUser.name, note:'Approved from Quote Tracker'});
+        await storeSet(btn.dataset.quickapprove, JSON.stringify(r));
+        renderSavedList();
+        toast('Approved: '+r.quoteRef);
       });
     });
   }
@@ -945,14 +1559,14 @@
   function loadQuote(r){
     document.getElementById('clientName').value = r.clientName;
     document.getElementById('quoteRef').value = r.quoteRef;
-    document.getElementById('preparedBy').value = r.preparedBy;
     document.getElementById('quoteDate').value = r.quoteDate;
-    document.getElementById('qualification').value = r.qualification;
+    if(QUALS[r.qualification]) qualSel.value = r.qualification;
     document.getElementById('nqfLevel').value = r.nqfLevel;
     document.getElementById('numLearners').value = r.numLearners;
     document.getElementById('trainingDays').value = r.trainingDays;
     document.getElementById('assessmentDays').value = r.assessmentDays;
     document.getElementById('moderationDays').value = r.moderationDays;
+    document.getElementById('revisionDays').value = r.revisionDays||0;
     document.getElementById('durationMonths').value = r.durationMonths;
     document.getElementById('eisaRequired').checked = r.eisaRequired;
     document.getElementById('externalMod').checked = r.externalMod;
@@ -967,7 +1581,8 @@
     discountSlider.value = r.discountPct;
     updateDeliveryUI();
     saveDraft();
-    document.querySelector('.tab-btn[data-tab="build"]').click();
+    switchTab('build');
+    refreshCurrentApproval();
     toast('Quote loaded: '+r.quoteRef);
   }
 
@@ -1027,11 +1642,8 @@
     if(confirm('Clear all fields on this quote?')){
       document.getElementById('clientName').value='';
       qRef.value = genRef();
-      document.getElementById('preparedBy').value='';
       document.getElementById('numLearners').value=20;
-      document.getElementById('trainingDays').value=20;
-      document.getElementById('assessmentDays').value=4;
-      document.getElementById('moderationDays').value=2;
+      qualSel.value='cfa'; qualSel.dispatchEvent(new Event('change'));
       document.getElementById('distanceKm').value=0;
       document.getElementById('numTrips').value=1;
       document.getElementById('travellers').value=1;
@@ -1040,13 +1652,17 @@
       discountSlider.value=0;
       document.querySelector('input[name="delivery"][value="centre"]').checked=true;
       updateDeliveryUI();
+      touchedFields = {};
+      revealAllErrors = false;
+      currentApproval = {status:'none', by:'', date:'', comment:''};
       calcAll();
     }
   });
 
   // ---------- Generate client-facing printable quote ----------
   document.getElementById('btnGenerate').addEventListener('click', function(){
-    if(!validateQuote()){
+    if(document.getElementById('btnGenerate').disabled) return;
+    if(!validateQuote(true)){
       toast('Please fix the highlighted fields before generating a quote.');
       return;
     }
@@ -1066,13 +1682,15 @@
 
     var deliveryLabel = c.delivery==='centre' ? 'Tiespro Training Centre, Durban' : (c.delivery==='local' ? 'Client site (local delivery)' : 'Client site (delivery with overnight logistics)');
     var durationMonths = document.getElementById('durationMonths').value || '12';
-    document.getElementById('pqSummaryTable').innerHTML =
+    var summaryRows =
       '<tr><th>Item</th><th>Detail</th></tr>'+
       '<tr><td>Programme duration</td><td>'+escapeHtml(durationMonths)+' month'+(durationMonths==='1'?'':'s')+'</td></tr>'+
       '<tr><td>Training days</td><td>'+c.trainingDays+'</td></tr>'+
       '<tr><td>Assessment days</td><td>'+c.assessmentDays+'</td></tr>'+
       '<tr><td>Delivery location</td><td>'+deliveryLabel+'</td></tr>'+
       '<tr><td>External examination (EISA)</td><td>'+(c.eisaOn?'Included':'Not applicable')+'</td></tr>';
+    if(c.revisionDays>0) summaryRows += '<tr><td>Revision days (additional)</td><td>'+c.revisionDays+'</td></tr>';
+    document.getElementById('pqSummaryTable').innerHTML = summaryRows;
 
     var vatAmt = c.finalPrice * c.rVAT/100;
     var priceRows =
@@ -1083,8 +1701,12 @@
     priceRows += '<tr><td>Travel &amp; Logistics</td><td class="amt">'+fmtR(c.logisticsTotal)+'</td></tr>';
     priceRows += '<tr><td>Learner Materials &amp; Compliance</td><td class="amt">'+fmtR(c.costMaterials + c.costPPE + c.costRegistration + c.costCert + c.costInsurance)+'</td></tr>';
     if(c.discountPct>0){
-      priceRows += '<tr><td>Programme Investment (before discount)</td><td class="amt">'+fmtR(c.listPrice)+'</td></tr>';
-      priceRows += '<tr><td>Discount ('+c.discountPct+'%)</td><td class="amt">-'+fmtR(c.listPrice - c.finalPrice)+'</td></tr>';
+      priceRows += '<tr><td>Standard Programme Investment (before discount)</td><td class="amt">'+fmtR(c.listPrice)+'</td></tr>';
+      priceRows += '<tr><td>Discount ('+c.discountPct+'%)</td><td class="amt">-'+fmtR(c.listPrice - c.finalStandardPrice)+'</td></tr>';
+    }
+    priceRows += '<tr class="total"><td>Standard Programme Total</td><td class="amt">'+fmtR(c.finalStandardPrice)+'</td></tr>';
+    if(c.revisionDays>0){
+      priceRows += '<tr><td>Additional: Revision Days ('+c.revisionDays+' days, not discounted)</td><td class="amt">'+fmtR(c.revisionListPrice)+'</td></tr>';
     }
     priceRows += '<tr class="total"><td>Total Investment (excl. VAT)</td><td class="amt">'+fmtR(c.finalPrice)+'</td></tr>';
     priceRows += '<tr><td>VAT ('+c.rVAT+'%)</td><td class="amt">'+fmtR(vatAmt)+'</td></tr>';
@@ -1102,7 +1724,6 @@
   function clearDirty(){ isDirty = false; }
   document.getElementById('tab-build').addEventListener('input', setDirty);
   document.getElementById('tab-build').addEventListener('change', setDirty);
-  document.getElementById('btnSave').addEventListener('click', clearDirty);
   window.addEventListener('beforeunload', function(e){
     if(!isDirty) return;
     e.preventDefault();
@@ -1111,7 +1732,7 @@
   });
 
   // ---------- Auto-save draft ----------
-  var DRAFT_KEYS = ['clientName','quoteRef','preparedBy','quoteDate','qualification','nqfLevel','numLearners','trainingDays','assessmentDays','moderationDays','durationMonths','distanceKm','numTrips','travellers','nights','personDaysAway','discountPct'];
+  var DRAFT_KEYS = ['clientName','quoteRef','preparedBy','quoteDate','qualification','nqfLevel','numLearners','trainingDays','assessmentDays','moderationDays','revisionDays','durationMonths','distanceKm','numTrips','travellers','nights','personDaysAway','discountSlider'];
   var DRAFT_CHECKBOXES = ['eisaRequired','externalMod','ppeRequired','venueRequired'];
   function saveDraft(){
     var draft = {};
@@ -1126,7 +1747,7 @@
     if(!raw) return;
     try{
       var draft = JSON.parse(raw);
-      DRAFT_KEYS.forEach(function(id){ if(draft[id]!==undefined) document.getElementById(id).value = draft[id]; });
+      DRAFT_KEYS.forEach(function(id){ if(draft[id]!==undefined && id!=='preparedBy') document.getElementById(id).value = draft[id]; });
       DRAFT_CHECKBOXES.forEach(function(id){ if(draft[id]!==undefined) document.getElementById(id).checked = draft[id]; });
       if(draft.delivery) document.querySelector('input[name="delivery"][value="'+draft.delivery+'"]').checked = true;
       updateDeliveryUI();
@@ -1135,15 +1756,25 @@
   document.getElementById('tab-build').addEventListener('input', function(){ saveDraft(); });
   document.getElementById('tab-build').addEventListener('change', function(){ saveDraft(); });
 
-  // ---------- Init ----------
-  loadAssumptions();
-  loadDraft();
+  // =====================================================================
+  // INIT
+  // =====================================================================
+  async function init(){
+    await loadStaff();
+    renderStaffTable();
+    renderCurriculumRefTable();
+    await loadAssumptions();
+    await loadDraft();
 
-  // Deep-link to a tab via URL hash (e.g. tool.html#saved from a PWA shortcut)
-  var hashTab = window.location.hash.replace('#','');
-  if(['build','assumptions','saved','help'].indexOf(hashTab)>-1){
-    switchTab(hashTab);
+    // Deep-link to a tab via URL hash (e.g. tool.html#saved from a PWA shortcut)
+    var hashTab = window.location.hash.replace('#','');
+    if(['build','saved','assumptions','access','help'].indexOf(hashTab)>-1){
+      switchTab(hashTab);
+    }
+
+    await tryAutoLogin();
   }
+  init();
 
   // ---------- PWA: install prompt ----------
   var deferredInstallPrompt = null;
